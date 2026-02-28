@@ -1,11 +1,11 @@
 import { useState } from "react";
 import { useLocation } from "wouter";
 import { motion, AnimatePresence } from "framer-motion";
-import { useCreateGoal } from "@/hooks/use-game";
+import { useCreateGoal, useGoals } from "@/hooks/use-game";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { MobileLayout } from "@/components/MobileLayout";
-import { AlertCircle, Dices } from "lucide-react";
+import { AlertCircle, Sparkles } from "lucide-react";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 
 const QUESTIONS = [
@@ -23,6 +23,8 @@ export default function GamePreparation() {
   const [questionIndex, setQuestionIndex] = useState(0);
   const [evenCount, setEvenCount] = useState(0);
   const [rejected, setRejected] = useState(false);
+  const [isProcessing, setIsProcessing] = useState(false);
+  const [resultMessage, setResultMessage] = useState<string | null>(null);
 
   const handleAmountSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -47,35 +49,49 @@ export default function GamePreparation() {
   const [rollValue, setRollValue] = useState<number | null>(null);
 
   const handleRoll = (value: number) => {
+    if (isProcessing) return;
     setRollValue(value);
+    setIsProcessing(true);
+    
     const isEven = value % 2 === 0;
 
     setTimeout(() => {
       if (!isEven) {
-        // ODD -> Accept!
-        createGoal.mutate(
-          { amount, status: "accepted" },
-          { onSuccess: () => setLocation("/training") }
-        );
+        setResultMessage("Принято!");
+        setTimeout(() => {
+          createGoal.mutate(
+            { amount, status: "accepted" },
+            { onSuccess: () => setLocation("/training") }
+          );
+        }, 1000);
       } else {
-        // EVEN -> Next question or Reject
-        const newEvenCount = evenCount + 1;
-        setEvenCount(newEvenCount);
-        setRollValue(null);
+        setResultMessage("Следующий вопрос");
+        setTimeout(() => {
+          const newEvenCount = evenCount + 1;
+          setEvenCount(newEvenCount);
+          setRollValue(null);
+          setResultMessage(null);
+          setIsProcessing(false);
 
-        if (newEvenCount >= 3) {
-          setRejected(true);
-        } else {
-          setQuestionIndex(prev => prev + 1);
-        }
+          if (newEvenCount >= 3) {
+            setRejected(true);
+          } else {
+            setQuestionIndex(prev => prev + 1);
+          }
+        }, 1000);
       }
-    }, 600);
+    }, 800);
   };
 
   const resetGame = () => {
     setStep("input");
     setAmount("");
     setRejected(false);
+    setQuestionIndex(0);
+    setEvenCount(0);
+    setRollValue(null);
+    setResultMessage(null);
+    setIsProcessing(false);
   };
 
   return (
@@ -132,32 +148,86 @@ export default function GamePreparation() {
               initial={{ opacity: 0, scale: 0.95 }}
               animate={{ opacity: 1, scale: 1 }}
               exit={{ opacity: 0, scale: 1.05 }}
-              className="flex flex-col gap-8"
+              className="flex flex-col items-center gap-12 py-8"
             >
-              <div className="glass-panel p-6 rounded-3xl text-center space-y-4">
-                <div className="inline-flex items-center justify-center w-12 h-12 rounded-full bg-primary/20 text-primary mb-2">
-                  <Dices className="w-6 h-6" />
-                </div>
-                <h3 className="font-display text-xl text-primary leading-relaxed">
-                  {QUESTIONS[questionIndex].replace("{amount}", amount)}
-                </h3>
-                <p className="text-muted-foreground text-sm">
-                  Бросьте кубик и выберите число от 1 до 6. <br/>
-                  (Нечетное - цель принята, Четное - следующий вопрос)
-                </p>
+              <div className="relative w-72 h-72 flex items-center justify-center">
+                {/* Crystal Ball Effect */}
+                <motion.div
+                  animate={{
+                    scale: [1, 1.05, 1],
+                    boxShadow: [
+                      "0 0 20px rgba(var(--primary), 0.3)",
+                      "0 0 40px rgba(var(--primary), 0.6)",
+                      "0 0 20px rgba(var(--primary), 0.3)"
+                    ]
+                  }}
+                  transition={{ duration: 3, repeat: Infinity, ease: "easeInOut" }}
+                  className={`absolute inset-0 rounded-full border-2 border-primary/30 bg-gradient-to-br from-primary/20 via-background to-primary/10 backdrop-blur-xl flex items-center justify-center p-8 text-center transition-colors duration-500 ${
+                    resultMessage === "Принято!" ? "border-green-500/50 bg-green-500/10" : 
+                    resultMessage === "Следующий вопрос" ? "border-amber-500/50 bg-amber-500/10" : ""
+                  }`}
+                >
+                  <AnimatePresence mode="wait">
+                    <motion.div
+                      key={resultMessage || questionIndex}
+                      initial={{ opacity: 0, scale: 0.8 }}
+                      animate={{ opacity: 1, scale: 1 }}
+                      exit={{ opacity: 0, scale: 1.2 }}
+                      className="space-y-2"
+                    >
+                      {resultMessage ? (
+                        <h3 className={`font-display text-2xl font-bold ${
+                          resultMessage === "Принято!" ? "text-green-400" : "text-amber-400"
+                        }`}>
+                          {resultMessage}
+                        </h3>
+                      ) : (
+                        <p className="font-display text-lg text-primary leading-tight">
+                          {QUESTIONS[questionIndex].replace("{amount}", amount)}
+                        </p>
+                      )}
+                    </motion.div>
+                  </AnimatePresence>
+                </motion.div>
+
+                {/* Orbiting Numbers */}
+                {[1, 2, 3, 4, 5, 6].map((num, i) => {
+                  const angle = (i * 60) * (Math.PI / 180);
+                  const radius = 160;
+                  const x = Math.cos(angle) * radius;
+                  const y = Math.sin(angle) * radius;
+
+                  return (
+                    <motion.div
+                      key={num}
+                      className="absolute"
+                      initial={{ x, y }}
+                      animate={rollValue === num ? { x: 0, y: 0, scale: 0, opacity: 0 } : { x, y }}
+                      transition={rollValue === num ? { duration: 0.5, ease: "backIn" } : {}}
+                    >
+                      <Button
+                        variant="outline"
+                        disabled={isProcessing}
+                        onClick={() => handleRoll(num)}
+                        className={`w-12 h-12 rounded-full border-primary/30 glass-panel font-display text-xl font-bold transition-all hover:scale-110 hover:border-primary ${
+                          isProcessing && rollValue !== num ? "opacity-30" : ""
+                        }`}
+                      >
+                        {num}
+                      </Button>
+                    </motion.div>
+                  );
+                })}
               </div>
 
-              <div className="grid grid-cols-3 gap-4">
-                {[1, 2, 3, 4, 5, 6].map(num => (
-                  <Button
-                    key={num}
-                    onClick={() => handleRoll(num)}
-                    variant={rollValue === num ? "default" : "outline"}
-                    className={`h-20 text-2xl font-display font-bold glass-panel border-primary/20 hover:bg-primary hover:text-primary-foreground hover:scale-105 transition-all ${rollValue === num ? 'bg-primary text-primary-foreground shadow-[0_0_15px_var(--primary)]' : ''}`}
-                  >
-                    {num}
-                  </Button>
-                ))}
+              <div className="text-center space-y-2 max-w-[280px]">
+                <div className="inline-flex items-center gap-2 text-primary/60 text-sm">
+                  <Sparkles className="w-4 h-4" />
+                  <span>Прикоснитесь к числу</span>
+                </div>
+                <p className="text-muted-foreground text-xs leading-relaxed">
+                  (Нечетное число открывает путь, четное ведет к следующему осознанию)
+                </p>
               </div>
             </motion.div>
           )}
