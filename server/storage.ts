@@ -170,6 +170,18 @@ export class MemStorage implements IStorage {
     return Array.from(this.notes.values()).filter(n => n.sessionId === sessionId);
   }
   async createNote(note: InsertCardNote): Promise<CardNote> {
+    const existing = Array.from(this.notes.values()).find(
+      n => n.sessionId === note.sessionId && 
+           n.cardId === note.cardId && 
+           n.parentId === (note.parentId ?? null)
+    );
+
+    if (existing) {
+      const updated = { ...existing, content: note.content };
+      this.notes.set(existing.id, updated);
+      return updated;
+    }
+
     const id = this.noteId++;
     const newNote = { ...note, id, parentId: note.parentId ?? null };
     this.notes.set(id, newNote);

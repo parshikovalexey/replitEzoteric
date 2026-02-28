@@ -109,10 +109,10 @@ function CardNoteDetail({
 
   // Sync content when existingNote changes
   useEffect(() => {
-    if (existingNote) {
+    if (existingNote && !content) {
       setContent(existingNote.content);
     }
-  }, [existingNote]);
+  }, [existingNote, content]);
 
   const hasNested = card.requiredDecks && card.requiredDecks.length > 0;
 
@@ -134,14 +134,18 @@ function CardNoteDetail({
   }, [notes, parentId]);
 
   const handleSave = () => {
-    if (!content.trim() && !existingNote) return;
+    if (content === existingNote?.content) {
+      onClose();
+      return;
+    }
+
     saveNote.mutate({ sessionId, cardId: card.id, content, parentId }, {
       onSuccess: () => {
         setIsSaved(true);
         setTimeout(() => {
           setIsSaved(false);
           onClose();
-        }, 1000);
+        }, 500);
       }
     });
   };
@@ -149,7 +153,7 @@ function CardNoteDetail({
   // Auto-save on unmount or when closing
   useEffect(() => {
     return () => {
-      if (content.trim() && content !== existingNote?.content) {
+      if (content !== existingNote?.content && (content.trim() || existingNote)) {
         saveNote.mutate({ sessionId, cardId: card.id, content, parentId });
       }
     };
