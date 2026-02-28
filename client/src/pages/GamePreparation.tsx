@@ -34,26 +34,42 @@ export default function GamePreparation() {
     }
   };
 
+  const formatDisplayAmount = (val: string) => {
+    const numbers = val.replace(/\D/g, "");
+    return numbers.replace(/\B(?=(\d{3})+(?!\d))/g, " ");
+  };
+
+  const handleAmountChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const raw = e.target.value.replace(/\D/g, "");
+    setAmount(formatDisplayAmount(raw));
+  };
+
+  const [rollValue, setRollValue] = useState<number | null>(null);
+
   const handleRoll = (value: number) => {
+    setRollValue(value);
     const isEven = value % 2 === 0;
 
-    if (!isEven) {
-      // ODD -> Accept!
-      createGoal.mutate(
-        { amount, status: "accepted" },
-        { onSuccess: () => setLocation("/training") }
-      );
-    } else {
-      // EVEN -> Next question or Reject
-      const newEvenCount = evenCount + 1;
-      setEvenCount(newEvenCount);
-
-      if (newEvenCount >= 3) {
-        setRejected(true);
+    setTimeout(() => {
+      if (!isEven) {
+        // ODD -> Accept!
+        createGoal.mutate(
+          { amount, status: "accepted" },
+          { onSuccess: () => setLocation("/training") }
+        );
       } else {
-        setQuestionIndex(prev => prev + 1);
+        // EVEN -> Next question or Reject
+        const newEvenCount = evenCount + 1;
+        setEvenCount(newEvenCount);
+        setRollValue(null);
+
+        if (newEvenCount >= 3) {
+          setRejected(true);
+        } else {
+          setQuestionIndex(prev => prev + 1);
+        }
       }
-    }
+    }, 600);
   };
 
   const resetGame = () => {
@@ -86,11 +102,14 @@ export default function GamePreparation() {
                   </label>
                   <Input 
                     value={amount}
-                    onChange={(e) => setAmount(e.target.value)}
+                    onChange={handleAmountChange}
                     placeholder="Например: 5 000 000 ₽"
                     className="text-center text-xl py-6 bg-background/50 border-primary/30 focus-visible:ring-primary/50 placeholder:text-muted-foreground/30"
                     autoFocus
                   />
+                  <p className="text-xs text-muted-foreground text-center italic mt-1">
+                    (умножьте свой текущий доход на 2 или 3 и выберите сумму из этого диапазона)
+                  </p>
                   <label className="text-lg text-center block text-primary/80 font-medium">
                     ...в год.
                   </label>
@@ -123,7 +142,7 @@ export default function GamePreparation() {
                   {QUESTIONS[questionIndex].replace("{amount}", amount)}
                 </h3>
                 <p className="text-muted-foreground text-sm">
-                  Бросьте кубик или выберите число от 1 до 6. <br/>
+                  Бросьте кубик и выберите число от 1 до 6. <br/>
                   (Нечетное - цель принята, Четное - следующий вопрос)
                 </p>
               </div>
@@ -133,8 +152,8 @@ export default function GamePreparation() {
                   <Button
                     key={num}
                     onClick={() => handleRoll(num)}
-                    variant="outline"
-                    className="h-20 text-2xl font-display font-bold glass-panel border-primary/20 hover:bg-primary hover:text-primary-foreground hover:scale-105 transition-all"
+                    variant={rollValue === num ? "default" : "outline"}
+                    className={`h-20 text-2xl font-display font-bold glass-panel border-primary/20 hover:bg-primary hover:text-primary-foreground hover:scale-105 transition-all ${rollValue === num ? 'bg-primary text-primary-foreground shadow-[0_0_15px_var(--primary)]' : ''}`}
                   >
                     {num}
                   </Button>

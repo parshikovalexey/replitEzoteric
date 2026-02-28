@@ -58,15 +58,26 @@ export class MemStorage implements IStorage {
     const d3 = this.addDeck({ name: "Действия", sphere: "Реализация", coverImage: "/actions.jpg" });
     
     // Seed Sessions
-    for (let i = 1; i <= 7; i++) {
+    const sessionData = [
+      { number: 1, name: "День 1. Интуиция", description: "Работа с интуицией и внутренним голосом." },
+      { number: 2, name: "День 2. Интуиция", description: "Углубление связи с интуитивными подсказками." },
+      { number: 3, name: "День 3. Действия", description: "Переход от идей к конкретным шагам." },
+      { number: 4, name: "День 4. Действия", description: "Масштабирование действий и реализация." },
+      { number: 5, name: "День 5. Разум", description: "Логический анализ и структурирование." },
+      { number: 6, name: "День 6. Разум", description: "Стратегическое планирование и ментальные установки." },
+      { number: 7, name: "День 7. Энергия", description: "Наполнение энергией и завершение цикла." }
+    ];
+
+    for (let i = 0; i < 7; i++) {
+      const data = sessionData[i];
       this.addSession({
-        number: i,
-        name: `Сессия ${i}`,
-        description: `Трансформационная сессия номер ${i}. В этой сессии вам предстоит поработать с колодами.`,
-        status: i === 1 ? 'available' : 'locked',
+        number: data.number,
+        name: data.name,
+        description: data.description,
+        status: i === 0 ? 'available' : 'locked',
         notes: '',
         timerMinutes: 30,
-        deckIds: i % 2 !== 0 ? [d1.id, d2.id] : [d3.id]
+        deckIds: (i + 1) % 2 !== 0 ? [d1.id, d2.id] : [d3.id]
       });
     }
     

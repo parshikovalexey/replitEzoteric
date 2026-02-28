@@ -58,19 +58,44 @@ function CardNoteDetail({
   card: any, sessionId: number, parentId?: number | null, onClose: () => void 
 }) {
   const { data: notes } = useNotesBySession(sessionId);
+  const { data: allDecks } = useDecks();
   const saveNote = useSaveNote();
   
-  // Find existing note for this exact card context (using parentId to distinguish nested)
+  // Find existing note for this exact card context
   const existingNote = notes?.find(n => n.cardId === card.id && n.parentId === parentId);
   const [content, setContent] = useState(existingNote?.content || "");
   const [isSaved, setIsSaved] = useState(false);
   const [activeNestedDeck, setActiveNestedDeck] = useState<number | null>(null);
 
+  const hasNested = card.requiredDecks && card.requiredDecks.length > 0;
+
+  // Track the chain of parent cards to show nesting
+  const parentChain = useMemo(() => {
+    const chain: any[] = [];
+    let currentParentId = parentId;
+    while (currentParentId !== null) {
+      const parentNote = notes?.find(n => n.cardId === currentParentId);
+      // This is a bit simplified, but helps show the path
+      if (parentNote) {
+        chain.unshift(parentNote);
+        currentParentId = parentNote.parentId;
+      } else {
+        break;
+      }
+    }
+    return chain;
+  }, [notes, parentId]);
+
   const handleSave = () => {
     saveNote.mutate({ sessionId, cardId: card.id, content, parentId }, {
       onSuccess: () => {
         setIsSaved(true);
-        setTimeout(() => setIsSaved(false), 2000);
+        if (!hasNested || parentId !== null) {
+          setTimeout(() => {
+            setIsSaved(false);
+            onClose();
+          }, 1000);
+        }
       }
     });
   };
@@ -90,6 +115,15 @@ function CardNoteDetail({
     <div className="flex flex-col h-full space-y-4">
       <div className="flex justify-between items-start">
         <div>
+          {parentChain.length > 0 && (
+            <div className="text-[10px] text-muted-foreground flex items-center gap-1 mb-1">
+              {parentChain.map((p, i) => (
+                <span key={i} className="flex items-center gap-1">
+                  Карта #{p.cardId} <ChevronRight className="w-2 h-2" />
+                </span>
+              ))}
+            </div>
+          )}
           <span className="text-xs font-bold text-primary uppercase tracking-wider">{card.actionType}</span>
           <h3 className="font-display text-xl font-bold mt-1">{card.name}</h3>
         </div>
@@ -100,22 +134,28 @@ function CardNoteDetail({
         {card.description}
       </p>
 
-      {card.requiredDecks && card.requiredDecks.length > 0 && (
+      {hasNested && (
         <div className="space-y-2 pt-2 border-t border-white/10">
           <p className="text-sm font-semibold text-primary">Требуются дополнительные карты:</p>
           <div className="flex gap-2 overflow-x-auto pb-2 no-scrollbar">
-            {card.requiredDecks.map((reqDeckId: number) => (
-              <Button 
-                key={reqDeckId} 
-                variant="outline" 
-                className="shrink-0 h-16 w-12 p-0 border-primary/50 bg-card hover:bg-primary/20 relative"
-                onClick={() => setActiveNestedDeck(reqDeckId)}
-              >
-                <div className="absolute inset-0 bg-primary/10 flex items-center justify-center">
-                  <span className="text-xs font-bold font-mono">D{reqDeckId}</span>
-                </div>
-              </Button>
-            ))}
+            {card.requiredDecks.map((reqDeckId: number) => {
+              const deck = allDecks?.find(d => d.id === reqDeckId);
+              return (
+                <Button 
+                  key={reqDeckId} 
+                  variant="outline" 
+                  className="shrink-0 h-16 w-12 p-0 border-primary/50 bg-card hover:bg-primary/20 relative overflow-hidden"
+                  onClick={() => setActiveNestedDeck(reqDeckId)}
+                >
+                  <div className="absolute inset-0 bg-primary/10 flex items-center justify-center">
+                    <span className="text-xs font-bold font-mono">N</span>
+                  </div>
+                  {deck?.coverImage && (
+                    <img src={deck.coverImage} className="absolute inset-0 w-full h-full object-cover opacity-30" alt="" />
+                  )}
+                </Button>
+              );
+            })}
           </div>
         </div>
       )}
@@ -148,7 +188,20 @@ export default function CardSelector() {
 
   const { data: deck, isLoading: deckLoading } = useDeck(deckId);
   const { data: cards, isLoading: cardsLoading } = useCardsByDeck(deckId);
+  const { data: notes } = useNotesBySession(sessionId);
   
+  // Filter cards that have notes in this session for this deck
+  const chosenCardIds = useMemo(() => {
+    if (!notes || !cards) return new Set<number>();
+    const ids = new Set<number>();
+    notes.forEach(n => {
+      if (cards.some(c => c.id === n.cardId)) {
+        ids.add(n.cardId);
+      }
+    });
+    return ids;
+  }, [notes, cards]);
+
   // Shuffle cards once on load
   const shuffledCards = useMemo(() => {
     if (!cards) return [];
@@ -158,10 +211,12 @@ export default function CardSelector() {
   const [flippedCards, setFlippedCards] = useState<Set<number>>(new Set());
   const [activeCard, setActiveCard] = useState<any | null>(null);
 
-  if (deckLoading || cardsLoading) return <MobileLayout><div className="text-center mt-20">Тасуем колоду...</div></MobileLayout>;
-  if (!deck) return <MobileLayout><div className="text-center mt-20">Колода не найдена</div></MobileLayout>;
-
   const handleCardClick = (card: any) => {
+    // Check if we already have a card chosen from THIS deck in this session
+    if (chosenCardIds.size > 0 && !chosenCardIds.has(card.id)) {
+      return; // Only allow one card per deck choice in this session logic
+    }
+
     setFlippedCards(prev => {
       const next = new Set(prev);
       next.add(card.id);
@@ -172,6 +227,9 @@ export default function CardSelector() {
       setActiveCard(card);
     }, 300);
   };
+
+  if (deckLoading || cardsLoading) return <MobileLayout><div className="text-center mt-20">Тасуем колоду...</div></MobileLayout>;
+  if (!deck) return <MobileLayout><div className="text-center mt-20">Колода не найдена</div></MobileLayout>;
 
   return (
     <MobileLayout 
@@ -185,15 +243,18 @@ export default function CardSelector() {
       <div className="grid grid-cols-2 sm:grid-cols-3 gap-4 auto-rows-max perspective-1000 p-2">
         <AnimatePresence>
           {shuffledCards.map((card, idx) => {
-            const isFlipped = flippedCards.has(card.id);
+            const isFlipped = flippedCards.has(card.id) || chosenCardIds.has(card.id);
+            const isChosen = chosenCardIds.has(card.id);
+            const canClick = chosenCardIds.size === 0 || isChosen;
+
             return (
               <motion.div
                 key={card.id}
                 initial={{ opacity: 0, y: 50 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: idx * 0.05 }}
-                className="aspect-[2/3] relative cursor-pointer group"
-                onClick={() => handleCardClick(card)}
+                className={`aspect-[2/3] relative ${canClick ? 'cursor-pointer' : 'cursor-not-allowed grayscale opacity-50'} group`}
+                onClick={() => canClick && handleCardClick(card)}
               >
                 <motion.div
                   className="w-full h-full relative transform-style-3d transition-transform duration-700 ease-out"
@@ -201,17 +262,21 @@ export default function CardSelector() {
                 >
                   {/* Front (Face down) */}
                   <div 
-                    className="absolute inset-0 backface-hidden rounded-xl border-2 border-primary/20 shadow-lg"
+                    className="absolute inset-0 backface-hidden rounded-xl border-2 border-primary/20 shadow-lg flex items-center justify-center overflow-hidden"
                     style={{ backgroundImage: `url(${deck.coverImage})`, backgroundSize: 'cover', backgroundPosition: 'center' }}
                   >
                     <div className="absolute inset-0 bg-primary/10 rounded-xl group-hover:bg-primary/20 transition-colors" />
+                    <span className="relative z-10 text-4xl font-bold text-white/40 font-display">
+                      {card.actionType === 'nested' ? 'N' : 'S'}
+                    </span>
                   </div>
 
                   {/* Back (Face up) */}
-                  <div className="absolute inset-0 backface-hidden rotate-y-180 bg-card border-2 border-primary shadow-xl rounded-xl p-4 flex flex-col justify-center items-center text-center overflow-hidden">
+                  <div className={`absolute inset-0 backface-hidden rotate-y-180 bg-card border-2 shadow-xl rounded-xl p-4 flex flex-col justify-center items-center text-center overflow-hidden ${isChosen ? 'border-primary shadow-[0_0_15px_var(--primary)]' : 'border-primary/50'}`}>
                     <div className="absolute inset-0 bg-gradient-to-b from-primary/10 to-transparent pointer-events-none" />
                     <span className="text-[10px] font-bold text-primary mb-2 uppercase">{card.actionType}</span>
                     <h5 className="font-display font-bold text-sm leading-tight text-foreground">{card.name}</h5>
+                    {isChosen && <div className="mt-2 bg-primary/20 px-2 py-0.5 rounded text-[10px] text-primary font-bold">ВЫБРАНО</div>}
                   </div>
                 </motion.div>
               </motion.div>

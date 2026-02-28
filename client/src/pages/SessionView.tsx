@@ -78,9 +78,15 @@ export default function SessionView() {
   // Filter decks available for this session
   const sessionDecks = allDecks?.filter(d => session.deckIds.includes(d.id)) || [];
 
+  const finishSession = () => {
+    updateSession.mutate({ id: sessionId, status: 'completed' }, {
+      onSuccess: () => setLocation("/training")
+    });
+  };
+
   return (
     <MobileLayout title={`Сессия ${session.number}`}>
-      <div className="space-y-6">
+      <div className="space-y-6 pb-20">
         {/* Header & Timer */}
         <div className="glass-panel p-6 rounded-3xl flex flex-col items-center text-center space-y-4">
           <h2 className="font-display text-2xl font-bold text-primary">{session.name}</h2>
@@ -90,15 +96,27 @@ export default function SessionView() {
             {timerStarted ? formatTime(timeLeft) : `${session.timerMinutes}:00`}
           </div>
 
-          {!timerStarted && (
-            <Button 
-              onClick={() => setShowWarning(true)}
-              className="w-full mt-2 py-6 text-lg bg-primary hover:bg-primary/90 text-primary-foreground shadow-lg shadow-primary/25"
-            >
-              <PlayCircle className="w-5 h-5 mr-2" />
-              Начать Сессию
-            </Button>
-          )}
+          <div className="flex flex-col w-full gap-2">
+            {!timerStarted && (
+              <Button 
+                onClick={() => setShowWarning(true)}
+                className="w-full py-6 text-lg bg-primary hover:bg-primary/90 text-primary-foreground shadow-lg shadow-primary/25"
+              >
+                <PlayCircle className="w-5 h-5 mr-2" />
+                Начать Сессию
+              </Button>
+            )}
+            
+            {timerStarted && session.status !== 'completed' && (
+              <Button 
+                onClick={finishSession}
+                variant="outline"
+                className="w-full py-4 border-primary/30 text-primary hover:bg-primary/10"
+              >
+                Завершить сессию
+              </Button>
+            )}
+          </div>
           {isExpired && (
             <div className="text-destructive font-bold text-sm bg-destructive/10 px-4 py-2 rounded-lg">
               Время вышло. Доступ к картам закрыт.
