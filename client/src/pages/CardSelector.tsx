@@ -1,6 +1,6 @@
 import { useState, useMemo } from "react";
 import { useRoute, useLocation } from "wouter";
-import { useDeck, useCardsByDeck, useNotesBySession, useSaveNote } from "@/hooks/use-game";
+import { useDeck, useCardsByDeck, useNotesBySession, useSaveNote, useDecks } from "@/hooks/use-game";
 import { MobileLayout } from "@/components/MobileLayout";
 import { Button } from "@/components/ui/button";
 import { ArrowLeft, ChevronRight, Check } from "lucide-react";
