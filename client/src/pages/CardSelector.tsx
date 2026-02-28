@@ -38,61 +38,90 @@ function NestedDeckItem({ deckId, parentCardId, sessionId, onClick }: any) {
 }
 
 function NestedDeckNav({ 
-  deckId, sessionId, parentCardId, onBack 
-}: { 
-  deckId: number, sessionId: number, parentCardId: number, onBack: () => void 
-}) {
-  const { data: cards } = useCardsByDeck(deckId);
-  const { data: deck } = useDeck(deckId);
-  const saveNote = useSaveNote();
-  const [selectedCard, setSelectedCard] = useState<any | null>(null);
+    deckId, sessionId, parentCardId, onBack 
+  }: { 
+    deckId: number, sessionId: number, parentCardId: number, onBack: () => void 
+  }) {
+    const { data: cards } = useCardsByDeck(deckId);
+    const { data: deck } = useDeck(deckId);
+    const { data: notes } = useNotesBySession(sessionId);
+    const saveNote = useSaveNote();
+    const [selectedCard, setSelectedCard] = useState<any | null>(null);
 
-  if (!cards || !deck) return <div className="p-8 text-center animate-pulse">Загрузка колоды...</div>;
+    const chosenCardId = useMemo(() => {
+      if (!notes || !cards) return null;
+      const cardIds = cards.map(c => c.id);
+      const note = notes.find(n => n.parentId === parentCardId && cardIds.includes(n.cardId));
+      return note ? note.cardId : null;
+    }, [notes, cards, parentCardId]);
 
-  if (selectedCard) {
+    // Immediately show note detail if a card is already chosen for this nested deck
+    if (chosenCardId && !selectedCard && cards) {
+      const card = cards.find(c => c.id === chosenCardId);
+      if (card) {
+        return (
+          <CardNoteDetail 
+            card={card} 
+            sessionId={sessionId} 
+            parentId={parentCardId}
+            onClose={onBack} 
+          />
+        );
+      }
+    }
+
+    useEffect(() => {
+      if (chosenCardId && !selectedCard && cards) {
+        const card = cards.find(c => c.id === chosenCardId);
+        if (card) setSelectedCard(card);
+      }
+    }, [chosenCardId, cards, selectedCard]);
+
+    if (!cards || !deck) return <div className="p-8 text-center animate-pulse text-primary">Загрузка колоды...</div>;
+
+    if (selectedCard) {
+      return (
+        <CardNoteDetail 
+          card={selectedCard} 
+          sessionId={sessionId} 
+          parentId={parentCardId}
+          onClose={() => setSelectedCard(null)} 
+        />
+      );
+    }
+
+    const handleNestedCardClick = (card: any) => {
+      saveNote.mutate({ 
+        sessionId, 
+        cardId: card.id, 
+        content: "", 
+        parentId: parentCardId 
+      }, {
+        onSuccess: () => {
+          setSelectedCard(card);
+        }
+      });
+    };
+
     return (
-      <CardNoteDetail 
-        card={selectedCard} 
-        sessionId={sessionId} 
-        parentId={parentCardId}
-        onClose={() => setSelectedCard(null)} 
-      />
+      <div className="space-y-4 h-full flex flex-col">
+        <div className="flex items-center gap-3">
+          <Button size="icon" variant="ghost" onClick={onBack}><ArrowLeft className="w-5 h-5" /></Button>
+          <h3 className="font-display font-bold text-lg">{deck.name}</h3>
+        </div>
+        <div className="flex-1 overflow-y-auto grid grid-cols-3 gap-3 p-1">
+          {cards.map((card) => (
+            <div 
+              key={card.id}
+              onClick={() => handleNestedCardClick(card)}
+              className="aspect-[2/3] rounded-lg border border-primary/30 cursor-pointer shadow-md"
+              style={{ backgroundImage: `url(${deck.coverImage})`, backgroundSize: 'cover' }}
+            />
+          ))}
+        </div>
+      </div>
     );
   }
-
-  const handleNestedCardClick = (card: any) => {
-    // Immediately save empty note for nested card to establish connection
-    saveNote.mutate({ 
-      sessionId, 
-      cardId: card.id, 
-      content: "", 
-      parentId: parentCardId 
-    }, {
-      onSuccess: () => {
-        setSelectedCard(card);
-      }
-    });
-  };
-
-  return (
-    <div className="space-y-4 h-full flex flex-col">
-      <div className="flex items-center gap-3">
-        <Button size="icon" variant="ghost" onClick={onBack}><ArrowLeft className="w-5 h-5" /></Button>
-        <h3 className="font-display font-bold text-lg">{deck.name}</h3>
-      </div>
-      <div className="flex-1 overflow-y-auto grid grid-cols-3 gap-3 p-1">
-        {cards.map((card) => (
-          <div 
-            key={card.id}
-            onClick={() => handleNestedCardClick(card)}
-            className="aspect-[2/3] rounded-lg border border-primary/30 cursor-pointer shadow-md"
-            style={{ backgroundImage: `url(${deck.coverImage})`, backgroundSize: 'cover' }}
-          />
-        ))}
-      </div>
-    </div>
-  );
-}
 
 function CardFace({ card, isChosen }: { card: any, isChosen?: boolean }) {
   return (
