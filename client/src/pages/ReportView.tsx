@@ -1,4 +1,4 @@
-import { useRef, useState, useMemo } from "react";
+import { useRef, useState, useMemo, useEffect } from "react";
   import { useGoals, useSessions, useDecks, useAllCards, useAllNotes } from "@/hooks/use-game";
   import { Button } from "@/components/ui/button";
   import { ArrowLeft, Download, Printer } from "lucide-react";
