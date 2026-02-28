@@ -301,6 +301,13 @@ export default function CardSelector() {
     const deckCardIds = cards.map(c => c.id);
     const rootNote = notes.find(n => n.parentId === null && deckCardIds.includes(n.cardId));
     return rootNote ? rootNote.cardId : null;
+
+  const handleClose = () => {
+    setActiveCard(null);
+    if (chosenRootCardId) {
+      setLocation(`/session/${sessionId}`);
+    }
+  };
   }, [notes, cards]);
 
   // Use a state to track which card is currently being "saved" as chosen
@@ -386,12 +393,6 @@ export default function CardSelector() {
     ? shuffledCards.filter(c => c.id === chosenRootCardId)
     : shuffledCards;
 
-  const handleClose = () => {
-    setActiveCard(null);
-    if (chosenRootCardId) {
-      setLocation(`/session/${sessionId}`);
-    }
-  };
 
   return (
     <MobileLayout 
