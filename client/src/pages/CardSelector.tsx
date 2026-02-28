@@ -90,11 +90,16 @@ function CardNoteDetail({
     saveNote.mutate({ sessionId, cardId: card.id, content, parentId }, {
       onSuccess: () => {
         setIsSaved(true);
-        if (!hasNested || parentId !== null) {
+        // If it's a nested card, it should always close after saving to return to parent
+        // If it's a standard card with NO nested decks, it should also close
+        if (parentId !== null || !hasNested) {
           setTimeout(() => {
             setIsSaved(false);
             onClose();
           }, 1000);
+        } else {
+          // It's a root card with nested decks, keep it open so user can click nested decks
+          setTimeout(() => setIsSaved(false), 2000);
         }
       }
     });
@@ -139,7 +144,7 @@ function CardNoteDetail({
           <p className="text-sm font-semibold text-primary">Требуются дополнительные карты:</p>
           <div className="flex gap-2 overflow-x-auto pb-2 no-scrollbar">
             {card.requiredDecks.map((reqDeckId: number) => {
-              const deck = allDecks?.find(d => d.id === reqDeckId);
+              const reqDeck = allDecks?.find(d => d.id === reqDeckId);
               return (
                 <Button 
                   key={reqDeckId} 
@@ -147,11 +152,11 @@ function CardNoteDetail({
                   className="shrink-0 h-16 w-12 p-0 border-primary/50 bg-card hover:bg-primary/20 relative overflow-hidden"
                   onClick={() => setActiveNestedDeck(reqDeckId)}
                 >
-                  <div className="absolute inset-0 bg-primary/10 flex items-center justify-center">
-                    <span className="text-xs font-bold font-mono">N</span>
+                  <div className="absolute inset-0 bg-primary/10 flex items-center justify-center z-10">
+                    <span className="text-xs font-bold font-mono text-primary">N</span>
                   </div>
-                  {deck?.coverImage && (
-                    <img src={deck.coverImage} className="absolute inset-0 w-full h-full object-cover opacity-30" alt="" />
+                  {reqDeck?.coverImage && (
+                    <img src={reqDeck.coverImage} className="absolute inset-0 w-full h-full object-cover opacity-30" alt="" />
                   )}
                 </Button>
               );
