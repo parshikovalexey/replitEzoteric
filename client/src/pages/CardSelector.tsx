@@ -266,13 +266,13 @@ export default function CardSelector() {
 
       // 2. Session access check
       if (!session || session.status === 'locked') {
-        setLocation("/training");
+        setLocation("/");
         return;
       }
 
       // 3. Deck accessibility check (must be in session.deckIds)
       if (!deck || !session.deckIds.includes(deckId)) {
-        setLocation(`/session/${sessionId}`);
+        setLocation("/");
         return;
       }
     }

@@ -28,7 +28,7 @@ export default function SessionView() {
 
       const currentSession = sessions.find(s => s.id === sessionId);
       if (!currentSession || currentSession.status === 'locked') {
-        setLocation("/training");
+        setLocation("/");
       }
     }
   }, [isLoading, goalsLoading, sessions, goals, sessionId, setLocation]);
