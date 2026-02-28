@@ -44,6 +44,7 @@ function NestedDeckNav({
 }) {
   const { data: cards } = useCardsByDeck(deckId);
   const { data: deck } = useDeck(deckId);
+  const saveNote = useSaveNote();
   const [selectedCard, setSelectedCard] = useState<any | null>(null);
 
   if (!cards || !deck) return <div className="p-8 text-center animate-pulse">Загрузка колоды...</div>;
