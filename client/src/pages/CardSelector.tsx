@@ -186,13 +186,6 @@ function CardNoteDetail({
             </p>
           </div>
         )}
-
-        {/* Description (centered layout) */}
-        <div className="w-full text-center space-y-2">
-          <p className="text-sm text-foreground/80 leading-relaxed max-w-md mx-auto">
-            {card.description}
-          </p>
-        </div>
       </div>
 
       {hasNested && (
