@@ -1,19 +1,27 @@
 import { useLocation } from "wouter";
 import { motion } from "framer-motion";
-import { useSessions } from "@/hooks/use-game";
+import { useSessions, useGoals } from "@/hooks/use-game";
 import { MobileLayout } from "@/components/MobileLayout";
 import { Button } from "@/components/ui/button";
 import { Progress } from "@/components/ui/progress";
 import { Lock, Play, CheckCircle2, FileText } from "lucide-react";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { CompletionModal } from "@/components/CompletionModal";
 
 export default function ScheduleView() {
   const [, setLocation] = useLocation();
-  const { data: sessions, isLoading } = useSessions();
+  const { data: sessions, isLoading: sessionsLoading } = useSessions();
+  const { data: goals, isLoading: goalsLoading } = useGoals();
   const [showCompletion, setShowCompletion] = useState(false);
 
-  if (isLoading) {
+  // Redirect to goal creation if no goal exists
+  useEffect(() => {
+    if (!goalsLoading && (!goals || goals.length === 0)) {
+      setLocation("/");
+    }
+  }, [goals, goalsLoading, setLocation]);
+
+  if (sessionsLoading || goalsLoading) {
     return (
       <MobileLayout title="Расписание">
         <div className="flex h-64 items-center justify-center">

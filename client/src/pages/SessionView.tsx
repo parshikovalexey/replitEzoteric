@@ -14,6 +14,18 @@ export default function SessionView() {
   const sessionId = Number(params?.id);
   
   const { data: session, isLoading } = useSession(sessionId);
+  const { data: sessions } = useSessions();
+  
+  // Check access
+  useEffect(() => {
+    if (!isLoading && sessions) {
+      const currentSession = sessions.find(s => s.id === sessionId);
+      if (!currentSession || currentSession.status === 'locked') {
+        setLocation("/training");
+      }
+    }
+  }, [isLoading, sessions, sessionId, setLocation]);
+
   const { data: allDecks } = useDecks();
   const { data: notes } = useNotesBySession(sessionId);
   const updateSession = useUpdateSession();
