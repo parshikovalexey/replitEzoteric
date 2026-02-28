@@ -47,6 +47,17 @@ import { useRef, useState, useMemo } from "react";
     const { data: allCards } = useAllCards();
     const { data: allNotes } = useAllNotes();
     const [isExporting, setIsExporting] = useState(false);
+    useEffect(() => {
+      if (sessions && sessions.length > 0) {
+        const isFinished = sessions.every(s => s.status === 'completed');
+        if (!isFinished) {
+          setLocation("/");
+        }
+      }
+    }, [sessions, setLocation]);
+  
+    
+  
 
     const goal = goals?.[goals.length - 1];
     
