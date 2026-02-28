@@ -158,7 +158,7 @@ export class MemStorage implements IStorage {
     const existing = Array.from(this.notes.values()).find(
       n => n.sessionId === note.sessionId && 
            n.cardId === note.cardId && 
-           n.parentId === (note.parentId ?? null)
+           n.parentId === (note.parentId ?? null) && n.slotIndex === (note.slotIndex ?? null)
     );
 
     if (existing) {
@@ -168,7 +168,7 @@ export class MemStorage implements IStorage {
     }
 
     const id = this.noteId++;
-    const newNote = { ...note, id, parentId: note.parentId ?? null };
+    const newNote = { ...note, id, parentId: note.parentId ?? null, slotIndex: note.slotIndex ?? null };
     this.notes.set(id, newNote);
     return newNote;
   }

@@ -44,6 +44,7 @@ export const cardNotes = pgTable("card_notes", {
   cardId: integer("card_id").notNull(),
   content: text("content").notNull(),
   parentId: integer("parent_id"),
+    slotIndex: integer("slot_index"),
 });
 
 export const insertGoalSchema = createInsertSchema(gameGoals).omit({ id: true });

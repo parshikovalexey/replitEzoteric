@@ -21,7 +21,7 @@ import { useState, useMemo, useEffect } from "react";
   }
 
   
-  function NestedDeckItem({ deckId, parentCardId, sessionId, onClick }: any) {
+  function NestedDeckItem({ deckId, parentCardId, sessionId, slotIndex, onClick }: any) {
     const { data: allDecks } = useDecks();
     const { data: notes } = useNotesBySession(sessionId);
     const { data: deckCards } = useCardsByDeck(deckId);
@@ -30,7 +30,7 @@ import { useState, useMemo, useEffect } from "react";
     const chosenCard = useMemo(() => {
       if (!notes || !deckCards) return null;
       const cardIds = deckCards.map(c => c.id);
-      const note = notes.find(n => n.parentId === parentCardId && cardIds.includes(n.cardId));
+      const note = notes.find(n => n.parentId === parentCardId && n.slotIndex === slotIndex && cardIds.includes(n.cardId));
       if (!note) return null;
       return deckCards.find(c => c.id === note.cardId);
     }, [notes, deckCards, parentCardId]);
@@ -69,9 +69,9 @@ import { useState, useMemo, useEffect } from "react";
     const { data: notes } = useNotesBySession(sessionId);
     const saveNote = useSaveNote();
     
-    const existingNote = notes?.find(n => n.cardId === card.id && n.parentId === parentId);
+    const existingNote = notes?.find(n => n.cardId === card.id && n.parentId === parentId && n.slotIndex === (slotIndex ?? null));
     const [content, setContent] = useState(existingNote?.content || "");
-    const [activeNestedDeck, setActiveNestedDeck] = useState<number | null>(null);
+    const [activeSlot, setActiveSlot] = useState<{deckId: number, index: number} | null>(null);
 
     useEffect(() => {
       if (existingNote && !content) {
@@ -110,7 +110,7 @@ import { useState, useMemo, useEffect } from "react";
         return;
       }
 
-      saveNote.mutate({ sessionId, cardId: card.id, content, parentId }, {
+      saveNote.mutate({ sessionId, cardId: card.id, content, parentId, slotIndex }, {
         onSuccess: () => {
           if (parentId === null) setLocation(`/session/${sessionId}`);
           else onClose();
@@ -121,12 +121,12 @@ import { useState, useMemo, useEffect } from "react";
     useEffect(() => {
       return () => {
         if (content !== existingNote?.content && (content.trim() || existingNote)) {
-          saveNote.mutate({ sessionId, cardId: card.id, content, parentId });
+          saveNote.mutate({ sessionId, cardId: card.id, content, parentId, slotIndex });
         }
       };
     }, [content, existingNote, sessionId, card.id, parentId]);
 
-    if (activeNestedDeck) {
+    if (activeSlot) {
       return (
         <NestedDeckNav 
           deckId={activeNestedDeck} 
@@ -177,7 +177,7 @@ import { useState, useMemo, useEffect } from "react";
                   deckId={reqDeckId}
                   parentCardId={card.id}
                   sessionId={sessionId}
-                  onClick={() => setActiveNestedDeck(reqDeckId)}
+                  slotIndex={idx} onClick={() => setActiveSlot({deckId: reqDeckId, index: idx})}
                 />
               ))}
             </div>
@@ -213,7 +213,7 @@ function NestedDeckNav({
     const chosenCardId = useMemo(() => {
       if (!notes || !cards) return null;
       const cardIds = cards.map(c => c.id);
-      const note = notes.find(n => n.parentId === parentCardId && cardIds.includes(n.cardId));
+      const note = notes.find(n => n.parentId === parentCardId && n.slotIndex === (slotIndex ?? null) && cardIds.includes(n.cardId));
       return note ? note.cardId : null;
     }, [notes, cards, parentCardId]);
 
@@ -226,7 +226,7 @@ function NestedDeckNav({
     }, [selectedCard, chosenCardId, cards]);
 
     const handleNestedCardClick = (card: any) => {
-      saveNote.mutate({ sessionId, cardId: card.id, content: "", parentId: parentCardId }, {
+      saveNote.mutate({ sessionId, cardId: card.id, content: "", parentId: parentCardId, slotIndex: slotIndex ?? null }, {
         onSuccess: () => setSelectedCard(card)
       });
     };
@@ -238,7 +238,7 @@ function NestedDeckNav({
         <CardNoteDetail 
           card={cardToShow} 
           sessionId={sessionId} 
-          parentId={parentCardId}
+          parentId={parentCardId} slotIndex={slotIndex}
           onClose={selectedCard ? () => setSelectedCard(null) : onBack} 
         />
       );
