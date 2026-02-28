@@ -18,7 +18,7 @@ export default function ReportView() {
   const [isExporting, setIsExporting] = useState(false);
 
   // Get the active goal
-  const goal = goals?.[0]; // Assuming first or active goal
+  const goal = goals?.[goals.length - 1]; // Use the latest goal
   
   const handleExportPDF = async () => {
     if (!printRef.current) return;

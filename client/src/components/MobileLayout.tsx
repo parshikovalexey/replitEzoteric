@@ -1,9 +1,9 @@
 import { ReactNode } from "react";
 import { ThemeSwitcher } from "./ThemeSwitcher";
-import { useGoal } from "@/hooks/use-game";
+import { useGoals } from "@/hooks/use-game";
 
 export function MobileLayout({ children, title, action }: { children: ReactNode; title?: string; action?: ReactNode }) {
-  const { data: goals } = useGoal();
+  const { data: goals } = useGoals();
   const currentGoal = goals?.[goals.length - 1];
 
   return (
