@@ -80,7 +80,7 @@ export default function GamePreparation() {
 
   return (
     <MobileLayout title="Постановка Цели">
-      <div className="flex flex-col gap-8 h-full justify-center -mt-12">
+      <div className="flex flex-col gap-8 h-full justify-center">
         <AnimatePresence mode="wait">
           {step === "input" && (
             <motion.div 
