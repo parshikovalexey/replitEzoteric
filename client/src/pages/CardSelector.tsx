@@ -254,6 +254,12 @@ function CardNoteDetail({
 }
 
 export default function CardSelector() {
+  const handleClose = () => {
+    setActiveCard(null);
+    if (chosenRootCardId) {
+      setLocation(`/session/${sessionId}`);
+    }
+  };
   const [, params] = useRoute("/session/:sessionId/deck/:deckId");
   const [, setLocation] = useLocation();
   const sessionId = Number(params?.sessionId);
@@ -302,12 +308,6 @@ export default function CardSelector() {
     const rootNote = notes.find(n => n.parentId === null && deckCardIds.includes(n.cardId));
     return rootNote ? rootNote.cardId : null;
 
-  const handleClose = () => {
-    setActiveCard(null);
-    if (chosenRootCardId) {
-      setLocation(`/session/${sessionId}`);
-    }
-  };
   }, [notes, cards]);
 
   // Use a state to track which card is currently being "saved" as chosen
