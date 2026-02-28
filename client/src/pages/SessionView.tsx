@@ -1,11 +1,11 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo } from "react";
 import { useRoute, useLocation } from "wouter";
-import { useSession, useDecks, useUpdateSession } from "@/hooks/use-game";
+import { useSession, useDecks, useUpdateSession, useNotesBySession, useCardsByDeck } from "@/hooks/use-game";
 import { MobileLayout } from "@/components/MobileLayout";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { Dialog, DialogContent, DialogDescription, DialogTitle } from "@/components/ui/dialog";
-import { Clock, PlayCircle, Lock } from "lucide-react";
+import { Clock, PlayCircle, Lock, ArrowLeft, CheckCircle2, X } from "lucide-react";
 import { motion } from "framer-motion";
 
 export default function SessionView() {
@@ -15,20 +15,19 @@ export default function SessionView() {
   
   const { data: session, isLoading } = useSession(sessionId);
   const { data: allDecks } = useDecks();
+  const { data: notes } = useNotesBySession(sessionId);
   const updateSession = useUpdateSession();
 
   const [showWarning, setShowWarning] = useState(false);
   const [timerStarted, setTimerStarted] = useState(false);
   const [timeLeft, setTimeLeft] = useState(0);
-  const [notes, setNotes] = useState("");
+  const [notesText, setNotes] = useState("");
 
   // Sync initial notes
   useEffect(() => {
     if (session && session.notes) setNotes(session.notes);
     if (session?.status === 'in_progress' || session?.status === 'completed') {
       setTimerStarted(true);
-      // In a real app, calculate true time left via backend timestamps.
-      // Here we simulate for the demo.
       setTimeLeft(session.timerMinutes * 60);
     }
   }, [session]);
@@ -50,12 +49,12 @@ export default function SessionView() {
 
   // Auto-save notes debounce
   useEffect(() => {
-    if (!session || notes === session.notes) return;
+    if (!session || notesText === session.notes) return;
     const timeout = setTimeout(() => {
-      updateSession.mutate({ id: sessionId, notes });
+      updateSession.mutate({ id: sessionId, notes: notesText });
     }, 1500);
     return () => clearTimeout(timeout);
-  }, [notes, sessionId, session, updateSession]);
+  }, [notesText, sessionId, session, updateSession]);
 
   if (isLoading || !session) return <MobileLayout><div className="animate-pulse flex justify-center mt-20">Загрузка...</div></MobileLayout>;
 
@@ -85,7 +84,14 @@ export default function SessionView() {
   };
 
   return (
-    <MobileLayout title={`Сессия ${session.number}`}>
+    <MobileLayout 
+      title={`Сессия ${session.number}`}
+      action={
+        <Button variant="ghost" size="icon" onClick={() => setLocation("/training")}>
+          <ArrowLeft className="w-5 h-5" />
+        </Button>
+      }
+    >
       <div className="space-y-6 pb-20">
         {/* Header & Timer */}
         <div className="glass-panel p-6 rounded-3xl flex flex-col items-center text-center space-y-4">
@@ -129,43 +135,23 @@ export default function SessionView() {
           <h3 className="font-display text-xl text-foreground ml-2">Колоды</h3>
           <div className="grid grid-cols-2 gap-4">
             {sessionDecks.map((deck) => (
-              <motion.div
+              <SessionDeckCard 
                 key={deck.id}
-                whileHover={canAccessCards ? { scale: 1.05 } : {}}
-                whileTap={canAccessCards ? { scale: 0.95 } : {}}
-                onClick={() => {
-                  if (canAccessCards) setLocation(`/session/${sessionId}/deck/${deck.id}`);
-                }}
-                className={`
-                  aspect-[3/4] rounded-xl border relative overflow-hidden flex flex-col justify-end p-4 transition-all
-                  ${canAccessCards ? 'cursor-pointer border-primary/50 shadow-[0_0_15px_rgba(var(--primary),0.1)]' : 'cursor-not-allowed border-white/5 opacity-50 grayscale'}
-                `}
-                style={{
-                  backgroundImage: `url(${deck.coverImage})`,
-                  backgroundSize: 'cover',
-                  backgroundPosition: 'center'
-                }}
-              >
-                <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/40 to-transparent" />
-                <div className="relative z-10 text-center">
-                  <h4 className="font-bold text-white leading-tight">{deck.name}</h4>
-                  <p className="text-xs text-white/70 mt-1">{deck.sphere}</p>
-                </div>
-                {!canAccessCards && timerStarted && (
-                  <div className="absolute inset-0 flex items-center justify-center bg-black/60 backdrop-blur-[2px] z-20">
-                    <Lock className="w-8 h-8 text-white/50" />
-                  </div>
-                )}
-              </motion.div>
+                deck={deck}
+                sessionId={sessionId}
+                canAccess={canAccessCards}
+                isCompleted={session.status === 'completed'}
+                onClick={() => setLocation(`/session/${sessionId}/deck/${deck.id}`)}
+              />
             ))}
           </div>
         </div>
 
-        {/* Session Notes (Always accessible) */}
+        {/* Session Notes */}
         <div className="space-y-3 pt-4">
           <h3 className="font-display text-xl text-foreground ml-2">Заметки по сессии</h3>
           <Textarea 
-            value={notes}
+            value={notesText}
             onChange={(e) => setNotes(e.target.value)}
             placeholder="Ваши инсайты, выводы и мысли по итогу сессии..."
             className="min-h-[200px] glass-panel border-primary/20 bg-background/50 text-base resize-none focus-visible:ring-primary/30"
@@ -192,5 +178,64 @@ export default function SessionView() {
         </DialogContent>
       </Dialog>
     </MobileLayout>
+  );
+}
+
+function SessionDeckCard({ deck, sessionId, canAccess, isCompleted, onClick }: any) {
+  const { data: cards } = useCardsByDeck(deck.id);
+  const { data: notes } = useNotesBySession(sessionId);
+  
+  const chosenCard = useMemo(() => {
+    if (!cards || !notes) return null;
+    const deckCardIds = cards.map(c => c.id);
+    const note = notes.find(n => n.parentId === null && deckCardIds.includes(n.cardId));
+    if (!note) return null;
+    return cards.find(c => c.id === note.cardId);
+  }, [cards, notes]);
+
+  return (
+    <motion.div
+      whileHover={canAccess ? { scale: 1.05 } : {}}
+      whileTap={canAccess ? { scale: 0.95 } : {}}
+      onClick={onClick}
+      className={`
+        aspect-[3/4] rounded-xl border relative overflow-hidden flex flex-col justify-end p-4 transition-all
+        ${canAccess ? 'cursor-pointer border-primary/50 shadow-[0_0_15px_rgba(var(--primary),0.1)]' : 'cursor-not-allowed border-white/5 opacity-50 grayscale'}
+        ${chosenCard ? 'border-primary shadow-[0_0_20px_var(--primary)]' : ''}
+      `}
+      style={{
+        backgroundImage: `url(${deck.coverImage})`,
+        backgroundSize: 'cover',
+        backgroundPosition: 'center'
+      }}
+    >
+      <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/40 to-transparent" />
+      
+      {chosenCard && (
+        <div className="absolute top-2 right-2 z-20">
+          <CheckCircle2 className="w-5 h-5 text-primary fill-background" />
+        </div>
+      )}
+
+      <div className="relative z-10 text-center">
+        {chosenCard ? (
+          <>
+            <h4 className="font-bold text-primary leading-tight text-sm uppercase">Выбрано:</h4>
+            <p className="text-xs text-white font-bold mt-1 line-clamp-2">{chosenCard.name}</p>
+          </>
+        ) : (
+          <>
+            <h4 className="font-bold text-white leading-tight">{deck.name}</h4>
+            <p className="text-xs text-white/70 mt-1">{deck.sphere}</p>
+          </>
+        )}
+      </div>
+      
+      {!canAccess && !isCompleted && (
+        <div className="absolute inset-0 flex items-center justify-center bg-black/60 backdrop-blur-[2px] z-20">
+          <Lock className="w-8 h-8 text-white/50" />
+        </div>
+      )}
+    </motion.div>
   );
 }

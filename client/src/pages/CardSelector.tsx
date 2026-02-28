@@ -3,7 +3,7 @@ import { useRoute, useLocation } from "wouter";
 import { useDeck, useCardsByDeck, useNotesBySession, useSaveNote, useDecks } from "@/hooks/use-game";
 import { MobileLayout } from "@/components/MobileLayout";
 import { Button } from "@/components/ui/button";
-import { ArrowLeft, ChevronRight, Check } from "lucide-react";
+import { ArrowLeft, ChevronRight, Check, X } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Drawer, DrawerContent, DrawerHeader, DrawerTitle, DrawerDescription } from "@/components/ui/drawer";
 import { Textarea } from "@/components/ui/textarea";
@@ -132,7 +132,7 @@ function CardNoteDetail({
           <span className="text-xs font-bold text-primary uppercase tracking-wider">{card.actionType}</span>
           <h3 className="font-display text-xl font-bold mt-1">{card.name}</h3>
         </div>
-        <Button size="icon" variant="ghost" onClick={onClose}><ChevronRight className="w-5 h-5" /></Button>
+        <Button size="icon" variant="ghost" onClick={onClose}><X className="w-5 h-5" /></Button>
       </div>
       
       <p className="text-sm text-foreground/80 leading-relaxed bg-background/50 p-3 rounded-lg border border-white/5">
@@ -195,16 +195,12 @@ export default function CardSelector() {
   const { data: cards, isLoading: cardsLoading } = useCardsByDeck(deckId);
   const { data: notes } = useNotesBySession(sessionId);
   
-  // Filter cards that have notes in this session for this deck
-  const chosenCardIds = useMemo(() => {
-    if (!notes || !cards) return new Set<number>();
-    const ids = new Set<number>();
-    notes.forEach(n => {
-      if (cards.some(c => c.id === n.cardId)) {
-        ids.add(n.cardId);
-      }
-    });
-    return ids;
+  // Filter cards that have notes in this session for this deck AS A ROOT CHOICE
+  const chosenRootCardId = useMemo(() => {
+    if (!notes || !cards) return null;
+    const deckCardIds = cards.map(c => c.id);
+    const rootNote = notes.find(n => n.parentId === null && deckCardIds.includes(n.cardId));
+    return rootNote ? rootNote.cardId : null;
   }, [notes, cards]);
 
   // Shuffle cards once on load
@@ -217,9 +213,9 @@ export default function CardSelector() {
   const [activeCard, setActiveCard] = useState<any | null>(null);
 
   const handleCardClick = (card: any) => {
-    // Check if we already have a card chosen from THIS deck in this session
-    if (chosenCardIds.size > 0 && !chosenCardIds.has(card.id)) {
-      return; // Only allow one card per deck choice in this session logic
+    // If we already have a root choice, only allow clicking THAT card
+    if (chosenRootCardId !== null && chosenRootCardId !== card.id) {
+      return;
     }
 
     setFlippedCards(prev => {
@@ -236,6 +232,10 @@ export default function CardSelector() {
   if (deckLoading || cardsLoading) return <MobileLayout><div className="text-center mt-20">Тасуем колоду...</div></MobileLayout>;
   if (!deck) return <MobileLayout><div className="text-center mt-20">Колода не найдена</div></MobileLayout>;
 
+  const displayCards = chosenRootCardId !== null 
+    ? shuffledCards.filter(c => c.id === chosenRootCardId)
+    : shuffledCards;
+
   return (
     <MobileLayout 
       title={deck.name}
@@ -245,12 +245,11 @@ export default function CardSelector() {
         </Button>
       }
     >
-      <div className="grid grid-cols-2 sm:grid-cols-3 gap-4 auto-rows-max perspective-1000 p-2">
+      <div className={`grid ${chosenRootCardId !== null ? 'grid-cols-1 justify-items-center' : 'grid-cols-2 sm:grid-cols-3'} gap-4 auto-rows-max perspective-1000 p-2`}>
         <AnimatePresence>
-          {shuffledCards.map((card, idx) => {
-            const isFlipped = flippedCards.has(card.id) || chosenCardIds.has(card.id);
-            const isChosen = chosenCardIds.has(card.id);
-            const canClick = chosenCardIds.size === 0 || isChosen;
+          {displayCards.map((card, idx) => {
+            const isFlipped = flippedCards.has(card.id) || chosenRootCardId === card.id;
+            const isChosen = chosenRootCardId === card.id;
 
             return (
               <motion.div
@@ -258,8 +257,8 @@ export default function CardSelector() {
                 initial={{ opacity: 0, y: 50 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: idx * 0.05 }}
-                className={`aspect-[2/3] relative ${canClick ? 'cursor-pointer' : 'cursor-not-allowed grayscale opacity-50'} group`}
-                onClick={() => canClick && handleCardClick(card)}
+                className={`${chosenRootCardId !== null ? 'w-48 sm:w-56' : 'w-full'} aspect-[2/3] relative cursor-pointer group`}
+                onClick={() => handleCardClick(card)}
               >
                 <motion.div
                   className="w-full h-full relative transform-style-3d transition-transform duration-700 ease-out"

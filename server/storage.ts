@@ -53,9 +53,9 @@ export class MemStorage implements IStorage {
   
   private seed() {
     // Seed Decks
-    const d1 = this.addDeck({ name: "Архетипы", sphere: "Самопознание", coverImage: "/archetypes.jpg" });
-    const d2 = this.addDeck({ name: "Страхи", sphere: "Подсознание", coverImage: "/fears.jpg" });
-    const d3 = this.addDeck({ name: "Действия", sphere: "Реализация", coverImage: "/actions.jpg" });
+    const d1 = this.addDeck({ name: "Архетипы", sphere: "Самопознание", coverImage: "https://images.unsplash.com/photo-1564419320461-6870880221ad?w=400" });
+    const d2 = this.addDeck({ name: "Страхи", sphere: "Подсознание", coverImage: "https://images.unsplash.com/photo-1509248961158-e54f6934749c?w=400" });
+    const d3 = this.addDeck({ name: "Действия", sphere: "Реализация", coverImage: "https://images.unsplash.com/photo-1484480974693-6ca0a78fb36b?w=400" });
     
     // Seed Sessions
     const sessionData = [
