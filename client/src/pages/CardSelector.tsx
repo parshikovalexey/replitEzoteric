@@ -1,6 +1,6 @@
 import { useState, useMemo, useEffect } from "react";
 import { useRoute, useLocation } from "wouter";
-import { useDeck, useCardsByDeck, useNotesBySession, useSaveNote, useDecks } from "@/hooks/use-game";
+import { useDeck, useCardsByDeck, useNotesBySession, useSaveNote, useDecks, useSession, useGoals } from "@/hooks/use-game";
 import { MobileLayout } from "@/components/MobileLayout";
 import { Button } from "@/components/ui/button";
 import { ArrowLeft, ChevronRight, Check, X } from "lucide-react";
@@ -251,7 +251,32 @@ export default function CardSelector() {
   const { data: deck, isLoading: deckLoading } = useDeck(deckId);
   const { data: cards, isLoading: cardsLoading } = useCardsByDeck(deckId);
   const { data: notes } = useNotesBySession(sessionId);
+  const { data: session, isLoading: sessionLoading } = useSession(sessionId);
+  const { data: goals, isLoading: goalsLoading } = useGoals();
   const saveNote = useSaveNote();
+
+  // Redirect logic
+  useEffect(() => {
+    if (!deckLoading && !sessionLoading && !goalsLoading && goals) {
+      // 1. Goal check
+      if (goals.length === 0) {
+        setLocation("/");
+        return;
+      }
+
+      // 2. Session access check
+      if (!session || session.status === 'locked') {
+        setLocation("/training");
+        return;
+      }
+
+      // 3. Deck accessibility check (must be in session.deckIds)
+      if (!deck || !session.deckIds.includes(deckId)) {
+        setLocation(`/session/${sessionId}`);
+        return;
+      }
+    }
+  }, [deck, deckLoading, session, sessionLoading, goals, goalsLoading, sessionId, deckId, setLocation]);
 
   // Filter cards that have notes in this session for this deck AS A ROOT CHOICE
   const chosenRootCardId = useMemo(() => {
