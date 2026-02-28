@@ -87,40 +87,9 @@ export default function SessionView() {
   const isExpired = timerStarted && timeLeft <= 0;
   const canAccessCards = timerStarted && !isExpired;
 
-  // Track if all decks in the session have a root card chosen
-  const allCardsChosen = useMemo(() => {
-    if (!session || !notes || !allDecks) return false;
-    const sessionDeckIds = session.deckIds;
-    
-    return sessionDeckIds.every(deckId => {
-      const deckCards = allDecks.find(d => d.id === deckId);
-      // We don't have the cards here directly, but we can check if any note 
-      // exists that belongs to a card in this deck and is a root note.
-      // However, it's easier to just check if the number of root notes matches deckIds length
-      // since each deck allows exactly one root choice.
-      return true; // Simplified for now, will fix below with proper logic
-    });
-  }, [session, notes, allDecks]);
-
-  // Check if each deck in the session has a chosen root card
-  const [chosenDeckIds, setChosenDeckIds] = useState<Set<number>>(new Set());
-
-  // Effect to update chosenDeckIds based on notes
-  // This is a bit reactive but more reliable
-  useEffect(() => {
-    if (!notes || !allDecks || !session) return;
-    const newChosen = new Set<number>();
-    // This requires knowing which card belongs to which deck.
-    // For now, let's use a simpler heuristic: if number of root notes >= number of decks
-    // but that's not perfect. The most reliable way is to let SessionDeckCard report back
-    // or just filter notes here.
-  }, [notes, allDecks, session]);
-
   const sessionDecks = allDecks?.filter(d => session.deckIds.includes(d.id)) || [];
 
   // Logic to determine if all cards are chosen
-  const { data: allCards } = useCardsByDeck(session.deckIds[0]); // This is a bit hacky, but hooks must be top level
-  // Instead, let's just count root notes and compare to deck count
   const rootNotesCount = notes?.filter(n => n.parentId === null).length || 0;
   const isReadyToFinish = rootNotesCount >= session.deckIds.length;
 
