@@ -23,8 +23,8 @@ export function MobileLayout({ children, title, action }: { children: ReactNode;
             </div>
           </div>
           {currentGoal && (
-            <div className="mt-2 text-xs text-primary/80 font-medium italic border-t border-white/5 pt-2 text-center">
-              Цель: {currentGoal.amount}
+            <div className="mt-2 text-[10px] text-primary/80 font-medium italic border-t border-white/5 pt-2 text-center leading-tight">
+              {currentGoal.question}
             </div>
           )}
         </header>

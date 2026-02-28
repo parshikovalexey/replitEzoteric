@@ -58,9 +58,10 @@ export default function GamePreparation() {
     setTimeout(() => {
       if (!isEven) {
         setResultMessage("Принято!");
+        const finalQuestion = QUESTIONS[questionIndex].replace("{amount}", amount);
         setTimeout(() => {
           createGoal.mutate(
-            { amount, status: "accepted" },
+            { amount, question: finalQuestion, status: "accepted" },
             { onSuccess: () => setLocation("/training") }
           );
         }, 1000);
@@ -224,9 +225,6 @@ export default function GamePreparation() {
                   <Sparkles className="w-4 h-4" />
                   <span>Брось кубик и выбери выпавшее число</span>
                 </div>
-                <p className="text-muted-foreground text-xs leading-relaxed">
-                  (Нечетное число открывает путь, четное ведет к следующему осознанию)
-                </p>
               </div>
             </motion.div>
           )}

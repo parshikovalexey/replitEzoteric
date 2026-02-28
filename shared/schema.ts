@@ -5,6 +5,7 @@ import { z } from "zod";
 export const gameGoals = pgTable("game_goals", {
   id: serial("id").primaryKey(),
   amount: text("amount").notNull(),
+  question: text("question").notNull(),
   status: text("status").notNull().default('pending'),
 });
 
