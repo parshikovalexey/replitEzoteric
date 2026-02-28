@@ -23,6 +23,7 @@ export const cards = pgTable("cards", {
   description: text("description").notNull(),
   actionType: text("action_type").notNull(),
   requiredDecks: integer("required_decks").array().notNull(),
+  tips: text("tips"),
 });
 
 export const sessions = pgTable("sessions", {

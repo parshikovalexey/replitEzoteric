@@ -146,26 +146,47 @@ function CardNoteDetail({
 
   return (
     <div className="flex flex-col h-full space-y-4">
-      <div className="flex justify-between items-start">
-        <div>
-          {parentChain.length > 0 && (
-            <div className="text-[10px] text-muted-foreground flex items-center gap-1 mb-1">
-              {parentChain.map((p, i) => (
-                <span key={i} className="flex items-center gap-1">
-                  Карта #{p.cardId} <ChevronRight className="w-2 h-2" />
-                </span>
-              ))}
-            </div>
-          )}
-          <span className="text-xs font-bold text-primary uppercase tracking-wider">{card.actionType}</span>
-          <h3 className="font-display text-xl font-bold mt-1">{card.name}</h3>
-        </div>
+      <div className="flex justify-end">
         <Button size="icon" variant="ghost" onClick={onClose}><X className="w-5 h-5" /></Button>
       </div>
-      
-      <p className="text-sm text-foreground/80 leading-relaxed bg-background/50 p-3 rounded-lg border border-white/5">
-        {card.description}
-      </p>
+
+      <div className={`flex flex-col md:flex-row gap-6 ${!card.tips ? 'items-center' : 'items-start'}`}>
+        {/* Left Side: Description and Tips if available */}
+        {card.tips && (
+          <div className="flex-1 space-y-4 order-2 md:order-1">
+            <div className="space-y-2">
+              <h4 className="text-sm font-bold text-primary uppercase">Описание</h4>
+              <p className="text-sm text-foreground/80 leading-relaxed bg-background/50 p-3 rounded-lg border border-white/5">
+                {card.description}
+              </p>
+            </div>
+            <div className="space-y-2">
+              <h4 className="text-sm font-bold text-[#d4af37] uppercase">Подсказки и толкования</h4>
+              <p className="text-sm text-foreground/80 leading-relaxed bg-[#d4af37]/5 p-3 rounded-lg border border-[#d4af37]/20 italic">
+                {card.tips}
+              </p>
+            </div>
+          </div>
+        )}
+
+        {/* Center/Right: Card Image */}
+        <div className={`shrink-0 order-1 md:order-2 ${!card.tips ? 'w-full flex justify-center' : ''}`}>
+          <div className="w-48 aspect-[2/3] bg-card border-2 border-primary/50 shadow-2xl rounded-2xl flex flex-col items-center justify-center relative overflow-hidden">
+            <div className="absolute inset-0 bg-gradient-to-b from-primary/10 to-transparent pointer-events-none" />
+            <span className="text-5xl font-display font-bold text-primary">#{card.id}</span>
+            <span className="text-xs font-medium mt-4 text-foreground/60 uppercase tracking-widest">{card.name}</span>
+          </div>
+        </div>
+
+        {/* Description only if no tips (centered layout) */}
+        {!card.tips && (
+          <div className="w-full order-3 text-center space-y-2">
+            <p className="text-sm text-foreground/80 leading-relaxed max-w-md mx-auto">
+              {card.description}
+            </p>
+          </div>
+        )}
+      </div>
 
       {hasNested && (
         <div className="space-y-2 pt-2 border-t border-white/10">
@@ -189,7 +210,7 @@ function CardNoteDetail({
         <Textarea 
           value={content}
           onChange={(e) => { setContent(e.target.value); setIsSaved(false); }}
-          className="flex-1 min-h-[120px] resize-none bg-background/50 border-white/10 focus-visible:ring-primary/50"
+          className="flex-1 min-h-[100px] resize-none bg-background/50 border-white/10 focus-visible:ring-primary/50"
           placeholder="Опишите свои мысли..."
         />
         <Button 

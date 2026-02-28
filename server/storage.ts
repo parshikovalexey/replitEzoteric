@@ -85,12 +85,16 @@ export class MemStorage implements IStorage {
     // Seed Cards for Decks
     [d1, d2, d3].forEach(deck => {
       for (let i = 1; i <= 10; i++) {
+        const isWithComment = i <= 3; // First 3 cards have comments/tips
         this.addCard({
           deckId: deck.id,
           name: `Карта ${i} (${deck.name})`,
-          description: `Описание и послание для карты ${i} из колоды ${deck.name}. Подумайте над этим.`,
+          description: isWithComment 
+            ? `Это глубокое описание карты ${i}, которое помогает раскрыть её суть в контексте ${deck.sphere}.` 
+            : `Описание и послание для карты ${i} из колоды ${deck.name}. Подумайте над этим.`,
           actionType: i % 3 === 0 ? 'nested' : 'standard',
-          requiredDecks: i % 3 === 0 ? [d4.id] : []
+          requiredDecks: i % 3 === 0 ? [d4.id] : [],
+          tips: isWithComment ? `Здесь будут подсказки и толкования карты ${i}. Это поможет вам лучше понять текущую ситуацию.` : null,
         });
       }
     });
