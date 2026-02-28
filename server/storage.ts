@@ -52,66 +52,51 @@ export class MemStorage implements IStorage {
   }
   
   private seed() {
-    // Seed Decks
-    const d1 = this.addDeck({ name: "Архетипы", sphere: "Самопознание", coverImage: "https://images.unsplash.com/photo-1564419320461-6870880221ad?w=400" });
-    const d2 = this.addDeck({ name: "Страхи", sphere: "Подсознание", coverImage: "https://images.unsplash.com/photo-1509248961158-e54f6934749c?w=400" });
-    const d3 = this.addDeck({ name: "Действия", sphere: "Реализация", coverImage: "https://images.unsplash.com/photo-1484480974693-6ca0a78fb36b?w=400" });
-    const d4 = this.addDeck({ name: "Метафорические карты", sphere: "Подсознание", coverImage: "https://images.unsplash.com/photo-1518531933037-91b2f5f229cc?w=400" });
-    
-    // Seed Sessions
-    const sessionData = [
-      { number: 1, name: "Интуиция", description: "Работа с интуицией и внутренним голосом." },
-      { number: 2, name: "Действия", description: "Углубление связи с интуитивными подсказками." },
-      { number: 3, name: "Разум", description: "Переход от идей к конкретным шагам." },
-      { number: 4, name: "Энергия", description: "Масштабирование действий и реализация." },
-      { number: 5, name: "Синтез", description: "Логический анализ и структурирование." },
-      { number: 6, name: "Мастерство", description: "Стратегическое планирование и ментальные установки." },
-      { number: 7, name: "Реализация", description: "Наполнение энергией и завершение цикла." }
-    ];
+      // Seed Decks
+      const d1 = this.addDeck({ name: "Страхи", sphere: "Подсознание", coverImage: "https://images.unsplash.com/photo-1509248961158-e54f6934749c?w=400" });
+      const d2 = this.addDeck({ name: "Метафорические карты", sphere: "Подсознание", coverImage: "https://images.unsplash.com/photo-1518531933037-91b2f5f229cc?w=400" });
+      const d3 = this.addDeck({ name: "Архетипы", sphere: "Самопознание", coverImage: "https://images.unsplash.com/photo-1564419320461-6870880221ad?w=400" });
+      const d4 = this.addDeck({ name: "Действия", sphere: "Реализация", coverImage: "https://images.unsplash.com/photo-1484480974693-6ca0a78fb36b?w=400" });
+      
+      // Seed Sessions (Update Session 1 to use Fears)
+      const sessionData = [
+        { number: 1, name: "Интуиция", description: "Работа с интуицией и внутренним голосом.", deckIds: [d1.id] },
+        { number: 2, name: "Действия", description: "Углубление связи с интуитивными подсказками.", deckIds: [d4.id] },
+        { number: 3, name: "Разум", description: "Переход от идей к конкретным шагам.", deckIds: [d1.id, d3.id] },
+        { number: 4, name: "Энергия", description: "Масштабирование действий и реализация.", deckIds: [d4.id] },
+        { number: 5, name: "Синтез", description: "Логический анализ и структурирование.", deckIds: [d1.id, d3.id] },
+        { number: 6, name: "Мастерство", description: "Стратегическое планирование и ментальные установки.", deckIds: [d4.id] },
+        { number: 7, name: "Реализация", description: "Наполнение энергией и завершение цикла.", deckIds: [d1.id, d3.id] }
+      ];
 
-    for (let i = 0; i < 7; i++) {
-      const data = sessionData[i];
-      this.addSession({
-        number: data.number,
-        name: data.name,
-        description: data.description,
-        status: i === 0 ? 'available' : 'locked',
-        notes: '',
-        timerMinutes: 30,
-        deckIds: (i + 1) % 2 !== 0 ? [d1.id, d2.id] : [d3.id]
-      });
-    }
-    
-    // Seed Cards for Decks
-    [d1, d2, d3].forEach(deck => {
-      for (let i = 1; i <= 10; i++) {
-        const isWithComment = i <= 3; // First 3 cards have comments/tips
-        this.addCard({
-          deckId: deck.id,
-          name: `Карта ${i} (${deck.name})`,
-          description: isWithComment 
-            ? `Это глубокое описание карты ${i}, которое помогает раскрыть её суть в контексте ${deck.sphere}.` 
-            : `Описание и послание для карты ${i} из колоды ${deck.name}. Подумайте над этим.`,
-          actionType: i % 3 === 0 ? 'nested' : 'standard',
-          requiredDecks: i % 3 === 0 ? [d4.id] : [],
-          tips: isWithComment ? `Здесь будут подсказки и толкования карты ${i}. Это поможет вам лучше понять текущую ситуацию.` : null,
+      for (let i = 0; i < 7; i++) {
+        const data = sessionData[i];
+        this.addSession({
+          number: data.number,
+          name: data.name,
+          description: data.description,
+          status: i === 0 ? 'available' : 'locked',
+          notes: '',
+          timerMinutes: 30,
+          deckIds: data.deckIds
         });
       }
-    });
 
-    // Seed 30 Metaphorical Cards
-    for (let i = 1; i <= 30; i++) {
-      this.addCard({
-        deckId: d4.id,
-        name: `МАК Карта ${i}`,
-        description: `Метафорическое послание карты ${i}. Что вы видите на этом изображении? какие чувства оно вызывает?`,
-        actionType: (i <= 7) ? 'nested' : 'standard',
-        requiredDecks: (i <= 7) ? [d1.id] : [] // Links to Archetypes for 7 cards
-      });
-    }
-  }
+      // Specific Test Chain: Fears -> 2 MAC -> Archetypes
+      this.addCard({ id: 1, deckId: d1.id, name: "Страхи 1", actionType: "nested", requiredDecks: [d2.id, d2.id], tips: "Загляните в лицо своим страхам." });
+      this.addCard({ id: 2, deckId: d2.id, name: "МК 1", actionType: "nested", requiredDecks: [d3.id], tips: "Что говорит этот образ?" });
+      this.addCard({ id: 3, deckId: d2.id, name: "МК 2", actionType: "standard", requiredDecks: [], tips: "Этот образ завершает картину." });
+      this.addCard({ id: 4, deckId: d3.id, name: "Архетипы", actionType: "standard", requiredDecks: [], tips: "Сила вашего духа." });
 
-  private addDeck(d: InsertDeck) {
+      // Fill other cards
+      for (let i = 5; i <= 20; i++) {
+         this.addCard({ deckId: d1.id, name: "Страх " + i, actionType: "standard", requiredDecks: [] });
+         this.addCard({ deckId: d2.id, name: "МАК " + i, actionType: "standard", requiredDecks: [] });
+         this.addCard({ deckId: d3.id, name: "Архетип " + i, actionType: "standard", requiredDecks: [] });
+         this.addCard({ deckId: d4.id, name: "Действие " + i, actionType: "standard", requiredDecks: [] });
+      }
+  
+  }  private addDeck(d: InsertDeck) {
     const id = this.deckId++;
     const deck = { ...d, id };
     this.decks.set(id, deck);
