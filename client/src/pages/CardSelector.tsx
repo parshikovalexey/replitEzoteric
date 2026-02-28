@@ -134,23 +134,23 @@ function CardNoteDetail({
   }, [notes, parentId]);
 
   const handleSave = () => {
+    if (!content.trim() && !existingNote) return; // Don't save empty if doesn't exist
     saveNote.mutate({ sessionId, cardId: card.id, content, parentId }, {
       onSuccess: () => {
         setIsSaved(true);
-        // If it's a nested card, it should always close after saving to return to parent
-        // If it's a standard card with NO nested decks, it should also close
-        if (parentId !== null || !hasNested) {
-          setTimeout(() => {
-            setIsSaved(false);
-            onClose();
-          }, 1000);
-        } else {
-          // It's a root card with nested decks, keep it open so user can click nested decks
-          setTimeout(() => setIsSaved(false), 2000);
-        }
+        setTimeout(() => setIsSaved(false), 2000);
       }
     });
   };
+
+  // Auto-save on unmount or when closing
+  useEffect(() => {
+    return () => {
+      if (content.trim() && content !== existingNote?.content) {
+        saveNote.mutate({ sessionId, cardId: card.id, content, parentId });
+      }
+    };
+  }, [content, existingNote, sessionId, card.id, parentId]);
 
   if (activeNestedDeck) {
     return (
