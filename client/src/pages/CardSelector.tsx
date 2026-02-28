@@ -169,40 +169,30 @@ function CardNoteDetail({
         <Button size="icon" variant="ghost" onClick={onClose}><X className="w-5 h-5" /></Button>
       </div>
 
-      <div className={`flex flex-col md:flex-row gap-6 ${!card.tips ? 'items-center' : 'items-start'}`}>
-        {/* Left Side: Description and Tips if available */}
-        {card.tips && (
-          <div className="flex-1 space-y-4 order-2 md:order-1">
-            <div className="space-y-2">
-              <h4 className="text-sm font-bold text-primary uppercase">Описание</h4>
-              <p className="text-sm text-foreground/80 leading-relaxed bg-background/50 p-3 rounded-lg border border-white/5">
-                {card.description}
-              </p>
-            </div>
-            <div className="space-y-2">
-              <h4 className="text-sm font-bold text-[#d4af37] uppercase">Подсказки и толкования</h4>
-              <p className="text-sm text-foreground/80 leading-relaxed bg-[#d4af37]/5 p-3 rounded-lg border border-[#d4af37]/20 italic">
-                {card.tips}
-              </p>
-            </div>
-          </div>
-        )}
-
-        {/* Center/Right: Card Image */}
-        <div className={`shrink-0 order-1 md:order-2 ${!card.tips ? 'w-full flex justify-center' : ''}`}>
+      <div className={`flex flex-col gap-6 items-center`}>
+        {/* Card Image */}
+        <div className="shrink-0 w-full flex justify-center">
           <div className="w-48 aspect-[2/3] relative">
             <CardFace card={card} isChosen={true} />
           </div>
         </div>
 
-        {/* Description only if no tips (centered layout) */}
-        {!card.tips && (
-          <div className="w-full order-3 text-center space-y-2">
-            <p className="text-sm text-foreground/80 leading-relaxed max-w-md mx-auto">
-              {card.description}
+        {/* Tips if available */}
+        {card.tips && (
+          <div className="w-full space-y-2">
+            <h4 className="text-sm font-bold text-[#d4af37] uppercase text-center">Подсказки и толкования</h4>
+            <p className="text-sm text-foreground/80 leading-relaxed bg-[#d4af37]/5 p-3 rounded-lg border border-[#d4af37]/20 italic text-center">
+              {card.tips}
             </p>
           </div>
         )}
+
+        {/* Description (centered layout) */}
+        <div className="w-full text-center space-y-2">
+          <p className="text-sm text-foreground/80 leading-relaxed max-w-md mx-auto">
+            {card.description}
+          </p>
+        </div>
       </div>
 
       {hasNested && (
