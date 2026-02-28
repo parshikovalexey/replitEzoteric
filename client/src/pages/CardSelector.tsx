@@ -222,10 +222,9 @@ function CardNoteDetail({
         />
         <Button 
           onClick={handleSave} 
-          disabled={saveNote.isPending || isSaved}
-          className={`w-full transition-all ${isSaved ? 'bg-green-600 hover:bg-green-600 text-white' : 'bg-primary'}`}
+          className="w-full bg-primary text-primary-foreground hover:bg-primary/90"
         >
-          {isSaved ? <><Check className="w-4 h-4 mr-2" /> Сохранено</> : 'Сохранить заметку'}
+          Сохранить заметку
         </Button>
       </div>
     </div>
