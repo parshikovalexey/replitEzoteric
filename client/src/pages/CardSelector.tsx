@@ -354,6 +354,33 @@ export default function CardSelector() {
     }
   };
 
+  if (deckLoading || cardsLoading || notesLoading) return <MobileLayout><div className="text-center mt-20 text-primary animate-pulse">Тасуем колоду...</div></MobileLayout>;
+  if (!deck) return <MobileLayout><div className="text-center mt-20">Колода не найдена</div></MobileLayout>;
+
+  // If a card is already chosen, we don't want to show the selection grid at all
+  if (chosenRootCardId !== null && activeCard) {
+    return (
+      <MobileLayout 
+        title={deck.name}
+        action={
+          <Button variant="ghost" size="icon" onClick={() => setLocation(`/session/${sessionId}`)}>
+            <ArrowLeft className="w-5 h-5" />
+          </Button>
+        }
+      >
+        <div className="flex flex-col items-center justify-center p-4 min-h-[60vh]">
+          <div className="w-full max-w-md glass-panel p-6 rounded-3xl">
+             <CardNoteDetail 
+                card={activeCard} 
+                sessionId={sessionId} 
+                onClose={handleClose} 
+              />
+          </div>
+        </div>
+      </MobileLayout>
+    );
+  }
+
 
   const displayCards = chosenRootCardId !== null 
     ? shuffledCards.filter(c => c.id === chosenRootCardId)
