@@ -354,8 +354,6 @@ export default function CardSelector() {
     }
   };
 
-  if (deckLoading || cardsLoading) return <MobileLayout><div className="text-center mt-20">Тасуем колоду...</div></MobileLayout>;
-  if (!deck) return <MobileLayout><div className="text-center mt-20">Колода не найдена</div></MobileLayout>;
 
   const displayCards = chosenRootCardId !== null 
     ? shuffledCards.filter(c => c.id === chosenRootCardId)
