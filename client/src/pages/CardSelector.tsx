@@ -376,7 +376,7 @@ export default function CardSelector() {
       <Drawer open={!!activeCard} onOpenChange={(open) => !open && setActiveCard(null)}>
         <DrawerContent className="h-[85vh] glass-panel border-t border-primary/30 rounded-t-3xl max-w-md mx-auto">
           <div className="w-12 h-1.5 bg-primary/30 rounded-full mx-auto my-3" />
-          <div className="flex-1 overflow-y-auto px-6 pb-6 w-full">
+          <div className="flex-1 overflow-y-auto px-6 pb-6 w-full custom-scrollbar">
             {activeCard && (
               <CardNoteDetail 
                 card={activeCard} 
