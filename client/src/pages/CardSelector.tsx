@@ -270,6 +270,12 @@ export default function CardSelector() {
         return;
       }
 
+      // 4. Session must be started to access cards
+      if (session.status !== 'in_progress' && session.status !== 'completed') {
+        setLocation(`/session/${sessionId}`);
+        return;
+      }
+
       // 3. Deck accessibility check (must be in session.deckIds)
       if (!deck || !session.deckIds.includes(deckId)) {
         setLocation("/");
