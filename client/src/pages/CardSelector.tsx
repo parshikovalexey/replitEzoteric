@@ -1,4 +1,4 @@
-import { useState, useMemo } from "react";
+import { useState, useMemo, useEffect } from "react";
 import { useRoute, useLocation } from "wouter";
 import { useDeck, useCardsByDeck, useNotesBySession, useSaveNote, useDecks } from "@/hooks/use-game";
 import { MobileLayout } from "@/components/MobileLayout";
