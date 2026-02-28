@@ -65,20 +65,19 @@ export default function GamePreparation() {
           );
         }, 1000);
       } else {
-        setResultMessage("Следующий вопрос");
-        setTimeout(() => {
-          const newEvenCount = evenCount + 1;
-          setEvenCount(newEvenCount);
-          setRollValue(null);
-          setResultMessage(null);
-          setIsProcessing(false);
-
-          if (newEvenCount >= 3) {
-            setRejected(true);
-          } else {
+        const newEvenCount = evenCount + 1;
+        if (newEvenCount >= 3) {
+          setRejected(true);
+        } else {
+          setResultMessage("Следующий вопрос");
+          setTimeout(() => {
+            setEvenCount(newEvenCount);
+            setRollValue(null);
+            setResultMessage(null);
+            setIsProcessing(false);
             setQuestionIndex(prev => prev + 1);
-          }
-        }, 1000);
+          }, 1000);
+        }
       }
     }, 800);
   };
@@ -223,7 +222,7 @@ export default function GamePreparation() {
               <div className="text-center space-y-2 max-w-[280px]">
                 <div className="inline-flex items-center gap-2 text-primary/60 text-sm">
                   <Sparkles className="w-4 h-4" />
-                  <span>Прикоснитесь к числу</span>
+                  <span>Брось кубик и выбери выпавшее число</span>
                 </div>
                 <p className="text-muted-foreground text-xs leading-relaxed">
                   (Нечетное число открывает путь, четное ведет к следующему осознанию)
