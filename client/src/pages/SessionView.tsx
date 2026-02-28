@@ -1,6 +1,6 @@
 import { useState, useEffect, useMemo } from "react";
 import { useRoute, useLocation } from "wouter";
-import { useSession, useDecks, useUpdateSession, useNotesBySession, useCardsByDeck } from "@/hooks/use-game";
+import { useSession, useDecks, useUpdateSession, useNotesBySession, useCardsByDeck, useSessions } from "@/hooks/use-game";
 import { MobileLayout } from "@/components/MobileLayout";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
