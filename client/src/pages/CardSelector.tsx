@@ -134,11 +134,14 @@ function CardNoteDetail({
   }, [notes, parentId]);
 
   const handleSave = () => {
-    if (!content.trim() && !existingNote) return; // Don't save empty if doesn't exist
+    if (!content.trim() && !existingNote) return;
     saveNote.mutate({ sessionId, cardId: card.id, content, parentId }, {
       onSuccess: () => {
         setIsSaved(true);
-        setTimeout(() => setIsSaved(false), 2000);
+        setTimeout(() => {
+          setIsSaved(false);
+          onClose();
+        }, 1000);
       }
     });
   };
@@ -215,7 +218,7 @@ function CardNoteDetail({
         />
         <Button 
           onClick={handleSave} 
-          disabled={!content.trim() || saveNote.isPending || isSaved}
+          disabled={saveNote.isPending || isSaved}
           className={`w-full transition-all ${isSaved ? 'bg-green-600 hover:bg-green-600 text-white' : 'bg-primary'}`}
         >
           {isSaved ? <><Check className="w-4 h-4 mr-2" /> Сохранено</> : 'Сохранить заметку'}
