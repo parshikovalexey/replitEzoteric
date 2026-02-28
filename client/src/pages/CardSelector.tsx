@@ -55,40 +55,14 @@ function NestedDeckNav({
       return note ? note.cardId : null;
     }, [notes, cards, parentCardId]);
 
-    // Immediately show note detail if a card is already chosen for this nested deck
-    if (chosenCardId && !selectedCard && cards) {
-      const card = cards.find(c => c.id === chosenCardId);
-      if (card) {
-        return (
-          <CardNoteDetail 
-            card={card} 
-            sessionId={sessionId} 
-            parentId={parentCardId}
-            onClose={onBack} 
-          />
-        );
+    // Derived state for the actual card to show detail for
+    const cardToShow = useMemo(() => {
+      if (selectedCard) return selectedCard;
+      if (chosenCardId && cards) {
+        return cards.find(c => c.id === chosenCardId) || null;
       }
-    }
-
-    useEffect(() => {
-      if (chosenCardId && !selectedCard && cards) {
-        const card = cards.find(c => c.id === chosenCardId);
-        if (card) setSelectedCard(card);
-      }
-    }, [chosenCardId, cards, selectedCard]);
-
-    if (!cards || !deck) return <div className="p-8 text-center animate-pulse text-primary">Загрузка колоды...</div>;
-
-    if (selectedCard) {
-      return (
-        <CardNoteDetail 
-          card={selectedCard} 
-          sessionId={sessionId} 
-          parentId={parentCardId}
-          onClose={() => setSelectedCard(null)} 
-        />
-      );
-    }
+      return null;
+    }, [selectedCard, chosenCardId, cards]);
 
     const handleNestedCardClick = (card: any) => {
       saveNote.mutate({ 
@@ -103,18 +77,32 @@ function NestedDeckNav({
       });
     };
 
+    // Conditional rendering starts HERE, after all hooks
+    if (!cards || !deck) return <div className="p-8 text-center animate-pulse text-primary font-display">Загрузка колоды...</div>;
+
+    if (cardToShow) {
+      return (
+        <CardNoteDetail 
+          card={cardToShow} 
+          sessionId={sessionId} 
+          parentId={parentCardId}
+          onClose={selectedCard ? () => setSelectedCard(null) : onBack} 
+        />
+      );
+    }
+
     return (
       <div className="space-y-4 h-full flex flex-col">
         <div className="flex items-center gap-3">
           <Button size="icon" variant="ghost" onClick={onBack}><ArrowLeft className="w-5 h-5" /></Button>
-          <h3 className="font-display font-bold text-lg">{deck.name}</h3>
+          <h3 className="font-display font-bold text-lg text-primary">{deck.name}</h3>
         </div>
-        <div className="flex-1 overflow-y-auto grid grid-cols-3 gap-3 p-1">
+        <div className="flex-1 overflow-y-auto grid grid-cols-3 gap-3 p-1 custom-scrollbar">
           {cards.map((card) => (
             <div 
               key={card.id}
               onClick={() => handleNestedCardClick(card)}
-              className="aspect-[2/3] rounded-lg border border-primary/30 cursor-pointer shadow-md"
+              className="aspect-[2/3] rounded-lg border border-primary/30 cursor-pointer shadow-md transition-all hover:border-primary/60 hover:scale-105"
               style={{ backgroundImage: `url(${deck.coverImage})`, backgroundSize: 'cover' }}
             />
           ))}
@@ -122,18 +110,6 @@ function NestedDeckNav({
       </div>
     );
   }
-
-function CardFace({ card, isChosen }: { card: any, isChosen?: boolean }) {
-  return (
-    <div className={`w-full h-full relative bg-card border-2 shadow-xl rounded-xl p-4 flex flex-col justify-center items-center text-center overflow-hidden ${isChosen ? 'border-primary shadow-[0_0_15px_var(--primary)]' : 'border-primary/50'}`}>
-      <div className="absolute inset-0 bg-gradient-to-b from-primary/10 to-transparent pointer-events-none" />
-      <span className="text-[10px] font-bold text-primary mb-2 uppercase tracking-wider">{card.actionType}</span>
-      <h5 className="font-display font-bold text-2xl leading-tight text-foreground">#{card.id}</h5>
-      <p className="font-display font-medium text-xs mt-2 text-foreground/80">{card.name}</p>
-      {isChosen && <div className="mt-2 bg-primary/20 px-2 py-0.5 rounded text-[10px] text-primary font-bold tracking-widest">ВЫБРАНО</div>}
-    </div>
-  );
-}
 
 // Card Note Detail Component (used recursively)
 function CardNoteDetail({ 
