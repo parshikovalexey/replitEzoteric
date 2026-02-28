@@ -107,6 +107,13 @@ function CardNoteDetail({
   const [isSaved, setIsSaved] = useState(false);
   const [activeNestedDeck, setActiveNestedDeck] = useState<number | null>(null);
 
+  // Sync content if note is created externally (like on initial click)
+  useEffect(() => {
+    if (existingNote?.content && !content) {
+      setContent(existingNote.content);
+    }
+  }, [existingNote]);
+
   const hasNested = card.requiredDecks && card.requiredDecks.length > 0;
 
   // Track the chain of parent cards to show nesting
@@ -244,6 +251,7 @@ export default function CardSelector() {
   const { data: deck, isLoading: deckLoading } = useDeck(deckId);
   const { data: cards, isLoading: cardsLoading } = useCardsByDeck(deckId);
   const { data: notes } = useNotesBySession(sessionId);
+  const saveNote = useSaveNote();
   
   // Filter cards that have notes in this session for this deck AS A ROOT CHOICE
   const chosenRootCardId = useMemo(() => {
@@ -264,9 +272,19 @@ export default function CardSelector() {
 
   const handleCardClick = (card: any) => {
     // If we already have a root choice, strictly prohibit opening ANY other card
-    // or even the same card if it's already "locked in" (though here we just open the drawer)
     if (chosenRootCardId !== null && chosenRootCardId !== card.id) {
       return;
+    }
+
+    // Immediately save an empty note to mark the card as "chosen" (root choice)
+    // This is the main deck selection (top-level)
+    if (chosenRootCardId === null) {
+      saveNote.mutate({ 
+        sessionId, 
+        cardId: card.id, 
+        content: "", 
+        parentId: null 
+      });
     }
 
     setFlippedCards(prev => {
