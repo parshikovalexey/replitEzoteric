@@ -311,6 +311,9 @@ export default function CardSelector() {
     return [...cards].sort(() => Math.random() - 0.5);
   }, [cards]);
 
+  const [flippedCards, setFlippedCards] = useState<Set<number>>(new Set());
+  const [activeCard, setActiveCard] = useState<any | null>(null);
+
   // Sync initial state: if a card is already chosen for this deck, open it
   useEffect(() => {
     if (!deckLoading && !cardsLoading && !notesLoading && chosenRootCardId && !activeCard && !isChoosingId) {
