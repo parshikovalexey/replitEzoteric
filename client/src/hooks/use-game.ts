@@ -146,3 +146,26 @@ export function useSaveNote() {
     },
   });
 }
+
+  export function useAllCards() {
+    return useQuery({
+      queryKey: ["/api/cards"],
+      queryFn: async () => {
+        const res = await fetch("/api/cards");
+        if (!res.ok) throw new Error("Failed to fetch cards");
+        return await res.json();
+      },
+    });
+  }
+
+  export function useAllNotes() {
+    return useQuery({
+      queryKey: ["/api/notes"],
+      queryFn: async () => {
+        const res = await fetch("/api/notes");
+        if (!res.ok) throw new Error("Failed to fetch notes");
+        return await res.json();
+      },
+    });
+  }
+  

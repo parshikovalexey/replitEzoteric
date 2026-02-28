@@ -84,5 +84,25 @@ export async function registerRoutes(
     }
   });
 
-  return httpServer;
+    app.get("/api/cards", async (_req, res) => {
+      const decks = await storage.getDecks();
+      let allCards: any[] = [];
+      for (const deck of decks) {
+        const cards = await storage.getCardsByDeck(deck.id);
+        allCards = [...allCards, ...cards];
+      }
+      res.json(allCards);
+    });
+
+    app.get("/api/notes", async (_req, res) => {
+      const sessions = await storage.getSessions();
+      let allNotes: any[] = [];
+      for (const session of sessions) {
+        const notes = await storage.getNotesBySession(session.id);
+        allNotes = [...allNotes, ...notes];
+      }
+      res.json(allNotes);
+    });
+
+    return httpServer;
 }
