@@ -79,6 +79,18 @@ function NestedDeckNav({
   );
 }
 
+function CardFace({ card, isChosen }: { card: any, isChosen?: boolean }) {
+  return (
+    <div className={`w-full h-full relative bg-card border-2 shadow-xl rounded-xl p-4 flex flex-col justify-center items-center text-center overflow-hidden ${isChosen ? 'border-primary shadow-[0_0_15px_var(--primary)]' : 'border-primary/50'}`}>
+      <div className="absolute inset-0 bg-gradient-to-b from-primary/10 to-transparent pointer-events-none" />
+      <span className="text-[10px] font-bold text-primary mb-2 uppercase tracking-wider">{card.actionType}</span>
+      <h5 className="font-display font-bold text-2xl leading-tight text-foreground">#{card.id}</h5>
+      <p className="font-display font-medium text-xs mt-2 text-foreground/80">{card.name}</p>
+      {isChosen && <div className="mt-2 bg-primary/20 px-2 py-0.5 rounded text-[10px] text-primary font-bold tracking-widest">ВЫБРАНО</div>}
+    </div>
+  );
+}
+
 // Card Note Detail Component (used recursively)
 function CardNoteDetail({ 
   card, sessionId, parentId = null, onClose 
@@ -171,10 +183,8 @@ function CardNoteDetail({
 
         {/* Center/Right: Card Image */}
         <div className={`shrink-0 order-1 md:order-2 ${!card.tips ? 'w-full flex justify-center' : ''}`}>
-          <div className="w-48 aspect-[2/3] bg-card border-2 border-primary/50 shadow-2xl rounded-2xl flex flex-col items-center justify-center relative overflow-hidden">
-            <div className="absolute inset-0 bg-gradient-to-b from-primary/10 to-transparent pointer-events-none" />
-            <span className="text-5xl font-display font-bold text-primary">#{card.id}</span>
-            <span className="text-xs font-medium mt-4 text-foreground/60 uppercase tracking-widest">{card.name}</span>
+          <div className="w-48 aspect-[2/3] relative">
+            <CardFace card={card} isChosen={true} />
           </div>
         </div>
 
@@ -253,7 +263,8 @@ export default function CardSelector() {
   const [activeCard, setActiveCard] = useState<any | null>(null);
 
   const handleCardClick = (card: any) => {
-    // If we already have a root choice, only allow clicking THAT card
+    // If we already have a root choice, strictly prohibit opening ANY other card
+    // or even the same card if it's already "locked in" (though here we just open the drawer)
     if (chosenRootCardId !== null && chosenRootCardId !== card.id) {
       return;
     }
@@ -310,18 +321,21 @@ export default function CardSelector() {
                     style={{ backgroundImage: `url(${deck.coverImage})`, backgroundSize: 'cover', backgroundPosition: 'center' }}
                   >
                     <div className="absolute inset-0 bg-primary/10 rounded-xl group-hover:bg-primary/20 transition-colors" />
-                    <span className="relative z-10 text-4xl font-bold text-white/40 font-display">
-                      {card.actionType === 'nested' ? 'N' : 'S'}
-                    </span>
+                    <div className="relative z-10 flex flex-col items-center gap-2">
+                      <span className="text-4xl font-bold text-white/40 font-display">
+                        {card.actionType === 'nested' ? 'N' : 'S'}
+                      </span>
+                      {card.tips && (
+                        <div className="px-2 py-0.5 rounded bg-primary/30 border border-primary/50 text-[10px] text-primary-foreground font-bold backdrop-blur-sm">
+                          СОВЕТ
+                        </div>
+                      )}
+                    </div>
                   </div>
 
                   {/* Back (Face up) */}
-                  <div className={`absolute inset-0 backface-hidden rotate-y-180 bg-card border-2 shadow-xl rounded-xl p-4 flex flex-col justify-center items-center text-center overflow-hidden ${isChosen ? 'border-primary shadow-[0_0_15px_var(--primary)]' : 'border-primary/50'}`}>
-                    <div className="absolute inset-0 bg-gradient-to-b from-primary/10 to-transparent pointer-events-none" />
-                    <span className="text-[10px] font-bold text-primary mb-2 uppercase">{card.actionType}</span>
-                    <h5 className="font-display font-bold text-2xl leading-tight text-foreground">#{card.id}</h5>
-                    <p className="font-display font-medium text-xs mt-2 text-foreground/80">{card.name}</p>
-                    {isChosen && <div className="mt-2 bg-primary/20 px-2 py-0.5 rounded text-[10px] text-primary font-bold">ВЫБРАНО</div>}
+                  <div className="absolute inset-0 backface-hidden rotate-y-180">
+                    <CardFace card={card} isChosen={isChosen} />
                   </div>
                 </motion.div>
               </motion.div>

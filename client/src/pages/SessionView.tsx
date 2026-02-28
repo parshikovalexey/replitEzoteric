@@ -199,6 +199,18 @@ export default function SessionView() {
   );
 }
 
+function CardFace({ card, isChosen }: { card: any, isChosen?: boolean }) {
+  return (
+    <div className={`w-full h-full relative bg-card border-2 shadow-xl rounded-xl p-4 flex flex-col justify-center items-center text-center overflow-hidden ${isChosen ? 'border-primary shadow-[0_0_15px_var(--primary)]' : 'border-primary/50'}`}>
+      <div className="absolute inset-0 bg-gradient-to-b from-primary/10 to-transparent pointer-events-none" />
+      <span className="text-[10px] font-bold text-primary mb-2 uppercase tracking-wider">{card.actionType}</span>
+      <h5 className="font-display font-bold text-2xl leading-tight text-foreground">#{card.id}</h5>
+      <p className="font-display font-medium text-xs mt-2 text-foreground/80">{card.name}</p>
+      {isChosen && <div className="mt-2 bg-primary/20 px-2 py-0.5 rounded text-[10px] text-primary font-bold tracking-widest">ВЫБРАНО</div>}
+    </div>
+  );
+}
+
 function SessionDeckCard({ deck, sessionId, canAccess, isCompleted, onClick, onCardChosen }: any) {
   const { data: cards } = useCardsByDeck(deck.id);
   const { data: notes } = useNotesBySession(sessionId);
@@ -229,27 +241,19 @@ function SessionDeckCard({ deck, sessionId, canAccess, isCompleted, onClick, onC
         backgroundPosition: 'center'
       }}
     >
-      <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/40 to-transparent" />
-      
-      {chosenCard && (
-        <div className="absolute top-2 right-2 z-20">
-          <CheckCircle2 className="w-5 h-5 text-primary fill-background" />
+      {chosenCard ? (
+        <div className="absolute inset-0 z-10">
+          <CardFace card={chosenCard} isChosen={true} />
         </div>
-      )}
-
-      <div className="relative z-10 text-center">
-        {chosenCard ? (
-          <>
-            <h4 className="font-bold text-primary leading-tight text-sm uppercase">Выбрано:</h4>
-            <p className="text-xs text-white font-bold mt-1 line-clamp-2">{chosenCard.name}</p>
-          </>
-        ) : (
-          <>
+      ) : (
+        <>
+          <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/40 to-transparent" />
+          <div className="relative z-10 text-center">
             <h4 className="font-bold text-white leading-tight">{deck.name}</h4>
             <p className="text-xs text-white/70 mt-1">{deck.sphere}</p>
-          </>
-        )}
-      </div>
+          </div>
+        </>
+      )}
       
       {!canAccess && !isCompleted && (
         <div className="absolute inset-0 flex items-center justify-center bg-black/60 backdrop-blur-[2px] z-20">
