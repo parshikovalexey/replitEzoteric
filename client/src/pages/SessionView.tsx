@@ -98,7 +98,7 @@ export default function SessionView() {
 
   return (
     <MobileLayout 
-      title={`Сессия ${session.number}`}
+      title={session.name}
       action={
         <Button variant="ghost" size="icon" onClick={() => setLocation("/training")}>
           <ArrowLeft className="w-5 h-5" />

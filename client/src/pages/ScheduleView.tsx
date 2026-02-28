@@ -50,8 +50,17 @@ export default function ScheduleView() {
           </div>
           <Progress value={progress} className="h-3 bg-background/50" indicatorClassName="bg-primary shadow-[0_0_10px_var(--primary)]" />
           <p className="text-xs text-muted-foreground text-right mt-1">
-            Завершено {completedCount} из {totalCount} сессий
+            Завершено {completedCount} из {totalCount} дней
           </p>
+          {isAllCompleted && (
+            <Button 
+              onClick={() => setShowCompletion(true)}
+              className="w-full mt-4 bg-primary/20 hover:bg-primary/30 text-primary border border-primary/30"
+            >
+              <FileText className="w-4 h-4 mr-2" />
+              Ознакомиться с отчетом
+            </Button>
+          )}
         </div>
 
         {/* Sessions List */}
@@ -83,9 +92,6 @@ export default function ScheduleView() {
                 <div className="flex items-start justify-between relative z-10">
                   <div className="space-y-1 pr-4">
                     <div className="flex items-center gap-2">
-                      <span className="text-xs font-bold px-2 py-1 rounded bg-secondary text-secondary-foreground">
-                        Сессия {session.number}
-                      </span>
                       {isCompleted && <CheckCircle2 className="w-4 h-4 text-green-500" />}
                     </div>
                     <h4 className={`font-display text-lg font-bold ${isAvailable ? 'text-primary' : 'text-foreground'}`}>

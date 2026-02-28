@@ -129,7 +129,10 @@ export default function GamePreparation() {
                 </Button>
                 <Button 
                   variant="outline"
-                  onClick={() => setStep("input")}
+                  onClick={() => {
+                    setAmount("");
+                    setStep("input");
+                  }}
                   className="w-full py-6 text-lg border-primary/30 text-primary"
                 >
                   Начать заново
