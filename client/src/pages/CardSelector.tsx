@@ -112,7 +112,7 @@ function CardNoteDetail({
     if (existingNote?.content && !content) {
       setContent(existingNote.content);
     }
-  }, [existingNote]);
+  }, [existingNote, content]);
 
   const hasNested = card.requiredDecks && card.requiredDecks.length > 0;
 
@@ -252,7 +252,7 @@ export default function CardSelector() {
   const { data: cards, isLoading: cardsLoading } = useCardsByDeck(deckId);
   const { data: notes } = useNotesBySession(sessionId);
   const saveNote = useSaveNote();
-  
+
   // Filter cards that have notes in this session for this deck AS A ROOT CHOICE
   const chosenRootCardId = useMemo(() => {
     if (!notes || !cards) return null;
@@ -260,6 +260,9 @@ export default function CardSelector() {
     const rootNote = notes.find(n => n.parentId === null && deckCardIds.includes(n.cardId));
     return rootNote ? rootNote.cardId : null;
   }, [notes, cards]);
+
+  // Use a state to track which card is currently being "saved" as chosen
+  const [isChoosingId, setIsChoosingId] = useState<number | null>(null);
 
   // Shuffle cards once on load
   const shuffledCards = useMemo(() => {
@@ -278,24 +281,32 @@ export default function CardSelector() {
 
     // Immediately save an empty note to mark the card as "chosen" (root choice)
     // This is the main deck selection (top-level)
-    if (chosenRootCardId === null) {
+    if (chosenRootCardId === null && isChoosingId !== card.id) {
+      setIsChoosingId(card.id);
       saveNote.mutate({ 
         sessionId, 
         cardId: card.id, 
         content: "", 
         parentId: null 
+      }, {
+        onSuccess: () => {
+          setIsChoosingId(null);
+          setActiveCard(card);
+        },
+        onError: () => {
+          setIsChoosingId(null);
+        }
       });
+    } else {
+      setActiveCard(card);
     }
 
+    // Update flipped cards locally for immediate visual feedback
     setFlippedCards(prev => {
       const next = new Set(prev);
       next.add(card.id);
       return next;
     });
-    // Add small delay for animation
-    setTimeout(() => {
-      setActiveCard(card);
-    }, 300);
   };
 
   if (deckLoading || cardsLoading) return <MobileLayout><div className="text-center mt-20">Тасуем колоду...</div></MobileLayout>;
