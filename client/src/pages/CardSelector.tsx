@@ -60,10 +60,11 @@ import { useState, useMemo, useEffect } from "react";
   }
 
 
+  
   function CardNoteDetail({ 
-    card, sessionId, parentId = null, onClose 
+    card, sessionId, parentId = null, slotIndex = null, onClose 
   }: { 
-    card: any, sessionId: number, parentId?: number | null, onClose: () => void 
+    card: any, sessionId: number, parentId?: number | null, slotIndex?: number | null, onClose: () => void 
   }) {
     const [, setLocation] = useLocation();
     const { data: notes } = useNotesBySession(sessionId);
@@ -81,16 +82,13 @@ import { useState, useMemo, useEffect } from "react";
 
     const hasNested = card.requiredDecks && card.requiredDecks.length > 0;
 
-    // Recursive function to aggregate child notes
     const getChildNotes = (parentCardId: number, currentNotes: any[]): string[] => {
       const children = currentNotes.filter(n => n.parentId === parentCardId);
       let results: string[] = [];
       for (const child of children) {
-        // Add child's own note if not empty
         if (child.content && child.content.trim()) {
           results.push(child.content.trim());
         }
-        // Recursively add grandchildren notes
         results = [...results, ...getChildNotes(child.cardId, currentNotes)];
       }
       return results;
@@ -124,15 +122,16 @@ import { useState, useMemo, useEffect } from "react";
           saveNote.mutate({ sessionId, cardId: card.id, content, parentId, slotIndex });
         }
       };
-    }, [content, existingNote, sessionId, card.id, parentId]);
+    }, [content, existingNote, sessionId, card.id, parentId, slotIndex]);
 
     if (activeSlot) {
       return (
         <NestedDeckNav 
-          deckId={activeNestedDeck} 
+          deckId={activeSlot.deckId} 
           sessionId={sessionId} 
           parentCardId={card.id} 
-          onBack={() => setActiveNestedDeck(null)} 
+          slotIndex={activeSlot.index}
+          onBack={() => setActiveSlot(null)} 
         />
       );
     }
@@ -177,7 +176,8 @@ import { useState, useMemo, useEffect } from "react";
                   deckId={reqDeckId}
                   parentCardId={card.id}
                   sessionId={sessionId}
-                  slotIndex={idx} onClick={() => setActiveSlot({deckId: reqDeckId, index: idx})}
+                  slotIndex={idx}
+                  onClick={() => setActiveSlot({deckId: reqDeckId, index: idx})}
                 />
               ))}
             </div>
@@ -198,11 +198,12 @@ import { useState, useMemo, useEffect } from "react";
       </div>
     );
   }
+  
 
-function NestedDeckNav({ 
-    deckId, sessionId, parentCardId, onBack 
+  function NestedDeckNav({ 
+    deckId, sessionId, parentCardId, slotIndex, onBack 
   }: { 
-    deckId: number, sessionId: number, parentCardId: number, onBack: () => void 
+    deckId: number, sessionId: number, parentCardId: number, slotIndex?: number, onBack: () => void 
   }) {
     const { data: cards } = useCardsByDeck(deckId);
     const { data: deck } = useDeck(deckId);
@@ -215,7 +216,7 @@ function NestedDeckNav({
       const cardIds = cards.map(c => c.id);
       const note = notes.find(n => n.parentId === parentCardId && n.slotIndex === (slotIndex ?? null) && cardIds.includes(n.cardId));
       return note ? note.cardId : null;
-    }, [notes, cards, parentCardId]);
+    }, [notes, cards, parentCardId, slotIndex]);
 
     const cardToShow = useMemo(() => {
       if (selectedCard) return selectedCard;
@@ -238,7 +239,8 @@ function NestedDeckNav({
         <CardNoteDetail 
           card={cardToShow} 
           sessionId={sessionId} 
-          parentId={parentCardId} slotIndex={slotIndex}
+          parentId={parentCardId}
+          slotIndex={slotIndex}
           onClose={selectedCard ? () => setSelectedCard(null) : onBack} 
         />
       );
@@ -263,8 +265,8 @@ function NestedDeckNav({
       </div>
     );
   }
-
-  export default function CardSelector() {
+  
+export default function CardSelector() {
     const [, params] = useRoute("/session/:sessionId/deck/:deckId");
     const [, setLocation] = useLocation();
     const sessionId = Number(params?.sessionId);
