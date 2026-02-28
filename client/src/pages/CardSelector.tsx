@@ -298,7 +298,8 @@ export default function CardSelector() {
                   <div className={`absolute inset-0 backface-hidden rotate-y-180 bg-card border-2 shadow-xl rounded-xl p-4 flex flex-col justify-center items-center text-center overflow-hidden ${isChosen ? 'border-primary shadow-[0_0_15px_var(--primary)]' : 'border-primary/50'}`}>
                     <div className="absolute inset-0 bg-gradient-to-b from-primary/10 to-transparent pointer-events-none" />
                     <span className="text-[10px] font-bold text-primary mb-2 uppercase">{card.actionType}</span>
-                    <h5 className="font-display font-bold text-sm leading-tight text-foreground">{card.name}</h5>
+                    <h5 className="font-display font-bold text-2xl leading-tight text-foreground">#{card.id}</h5>
+                    <p className="font-display font-medium text-xs mt-2 text-foreground/80">{card.name}</p>
                     {isChosen && <div className="mt-2 bg-primary/20 px-2 py-0.5 rounded text-[10px] text-primary font-bold">ВЫБРАНО</div>}
                   </div>
                 </motion.div>

@@ -56,6 +56,7 @@ export class MemStorage implements IStorage {
     const d1 = this.addDeck({ name: "Архетипы", sphere: "Самопознание", coverImage: "https://images.unsplash.com/photo-1564419320461-6870880221ad?w=400" });
     const d2 = this.addDeck({ name: "Страхи", sphere: "Подсознание", coverImage: "https://images.unsplash.com/photo-1509248961158-e54f6934749c?w=400" });
     const d3 = this.addDeck({ name: "Действия", sphere: "Реализация", coverImage: "https://images.unsplash.com/photo-1484480974693-6ca0a78fb36b?w=400" });
+    const d4 = this.addDeck({ name: "Метафорические карты", sphere: "Подсознание", coverImage: "https://images.unsplash.com/photo-1518531933037-91b2f5f229cc?w=400" });
     
     // Seed Sessions
     const sessionData = [
@@ -83,17 +84,27 @@ export class MemStorage implements IStorage {
     
     // Seed Cards for Decks
     [d1, d2, d3].forEach(deck => {
-      // 8-52 cards per deck, we'll do 10 for seed
       for (let i = 1; i <= 10; i++) {
         this.addCard({
           deckId: deck.id,
           name: `Карта ${i} (${deck.name})`,
           description: `Описание и послание для карты ${i} из колоды ${deck.name}. Подумайте над этим.`,
           actionType: i % 3 === 0 ? 'nested' : 'standard',
-          requiredDecks: i % 3 === 0 ? (deck.id === d1.id ? [d2.id] : [d1.id]) : []
+          requiredDecks: i % 3 === 0 ? [d4.id] : []
         });
       }
     });
+
+    // Seed 30 Metaphorical Cards
+    for (let i = 1; i <= 30; i++) {
+      this.addCard({
+        deckId: d4.id,
+        name: `МАК Карта ${i}`,
+        description: `Метафорическое послание карты ${i}. Что вы видите на этом изображении? какие чувства оно вызывает?`,
+        actionType: (i <= 7) ? 'nested' : 'standard',
+        requiredDecks: (i <= 7) ? [d1.id] : [] // Links to Archetypes for 7 cards
+      });
+    }
   }
 
   private addDeck(d: InsertDeck) {
