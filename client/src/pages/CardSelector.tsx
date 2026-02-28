@@ -107,12 +107,12 @@ function CardNoteDetail({
   const [isSaved, setIsSaved] = useState(false);
   const [activeNestedDeck, setActiveNestedDeck] = useState<number | null>(null);
 
-  // Sync content if note is created externally (like on initial click)
+  // Sync content when existingNote changes
   useEffect(() => {
-    if (existingNote?.content && !content) {
+    if (existingNote) {
       setContent(existingNote.content);
     }
-  }, [existingNote, content]);
+  }, [existingNote]);
 
   const hasNested = card.requiredDecks && card.requiredDecks.length > 0;
 
@@ -373,11 +373,10 @@ export default function CardSelector() {
         </AnimatePresence>
       </div>
 
-      {/* Slide-out Drawer for Card Details & Notes */}
       <Drawer open={!!activeCard} onOpenChange={(open) => !open && setActiveCard(null)}>
         <DrawerContent className="h-[85vh] glass-panel border-t border-primary/30 rounded-t-3xl">
           <div className="w-12 h-1.5 bg-primary/30 rounded-full mx-auto my-3" />
-          <div className="flex-1 overflow-y-auto px-6 pb-6">
+          <div className="flex-1 overflow-y-auto px-6 pb-6 max-w-md mx-auto w-full">
             {activeCard && (
               <CardNoteDetail 
                 card={activeCard} 
