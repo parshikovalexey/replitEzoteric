@@ -20,33 +20,45 @@ import { useState, useMemo, useEffect } from "react";
     );
   }
 
+  
   function NestedDeckItem({ deckId, parentCardId, sessionId, onClick }: any) {
     const { data: allDecks } = useDecks();
     const { data: notes } = useNotesBySession(sessionId);
     const { data: deckCards } = useCardsByDeck(deckId);
     const deck = allDecks?.find(d => d.id === deckId);
     
-    const isChosen = useMemo(() => {
-      if (!notes || !deckCards) return false;
+    const chosenCard = useMemo(() => {
+      if (!notes || !deckCards) return null;
       const cardIds = deckCards.map(c => c.id);
-      return notes.some(n => n.parentId === parentCardId && cardIds.includes(n.cardId));
+      const note = notes.find(n => n.parentId === parentCardId && cardIds.includes(n.cardId));
+      if (!note) return null;
+      return deckCards.find(c => c.id === note.cardId);
     }, [notes, deckCards, parentCardId]);
 
     return (
       <Button 
         variant="outline" 
-        className={`shrink-0 h-16 w-12 p-0 border-primary/50 bg-card hover:bg-primary/20 relative overflow-hidden ${isChosen ? 'ring-2 ring-primary ring-offset-2 ring-offset-background' : ''}`}
+        className={`shrink-0 h-24 w-16 p-0 border-primary/50 bg-card hover:bg-primary/20 relative overflow-hidden ${chosenCard ? 'border-primary/50' : ''}`}
         onClick={onClick}
       >
-        <div className="absolute inset-0 bg-primary/10 flex items-center justify-center z-10">
-          <span className="text-xs font-bold font-mono text-primary">{isChosen ? <Check className="w-4 h-4" /> : 'N'}</span>
-        </div>
-        {deck?.coverImage && (
-          <img src={deck.coverImage} className="absolute inset-0 w-full h-full object-cover opacity-30" alt="" />
+        {chosenCard ? (
+          <div className="w-full h-full scale-50 origin-center pointer-events-none">
+             <CardFace card={chosenCard} isChosen={false} />
+          </div>
+        ) : (
+          <>
+            <div className="absolute inset-0 bg-primary/10 flex items-center justify-center z-10">
+              <span className="text-xs font-bold font-mono text-primary">N</span>
+            </div>
+            {deck?.coverImage && (
+              <img src={deck.coverImage} className="absolute inset-0 w-full h-full object-cover opacity-30" alt="" />
+            )}
+          </>
         )}
       </Button>
     );
   }
+
 
   function CardNoteDetail({ 
     card, sessionId, parentId = null, onClose 
@@ -68,6 +80,27 @@ import { useState, useMemo, useEffect } from "react";
     }, [existingNote, content]);
 
     const hasNested = card.requiredDecks && card.requiredDecks.length > 0;
+
+    // Recursive function to aggregate child notes
+    const getChildNotes = (parentCardId: number, currentNotes: any[]): string[] => {
+      const children = currentNotes.filter(n => n.parentId === parentCardId);
+      let results: string[] = [];
+      for (const child of children) {
+        // Add child's own note if not empty
+        if (child.content && child.content.trim()) {
+          results.push(child.content.trim());
+        }
+        // Recursively add grandchildren notes
+        results = [...results, ...getChildNotes(child.cardId, currentNotes)];
+      }
+      return results;
+    };
+
+    const aggregatedChildNotes = useMemo(() => {
+      if (!notes) return "";
+      const childNotesList = getChildNotes(card.id, notes);
+      return childNotesList.join('\n\n');
+    }, [notes, card.id]);
 
     const handleSave = () => {
       const isChanged = content !== existingNote?.content;
@@ -124,13 +157,23 @@ import { useState, useMemo, useEffect } from "react";
             </div>
           )}
         </div>
+
+        {aggregatedChildNotes && (
+          <div className="p-3 bg-primary/5 border border-primary/20 rounded-lg space-y-2">
+             <h4 className="text-[10px] font-bold text-primary uppercase tracking-wider">Заметки из вложенных карт</h4>
+             <div className="text-sm text-foreground/90 whitespace-pre-wrap leading-relaxed">
+               {aggregatedChildNotes}
+             </div>
+          </div>
+        )}
+
         {hasNested && (
           <div className="space-y-2 pt-2 border-t border-white/10">
             <p className="text-sm font-semibold text-primary">Требуются дополнительные карты:</p>
             <div className="flex gap-2 overflow-x-auto pb-2 no-scrollbar">
-              {card.requiredDecks.map((reqDeckId: number) => (
+              {card.requiredDecks.map((reqDeckId: number, idx: number) => (
                 <NestedDeckItem 
-                  key={reqDeckId}
+                  key={`req-${reqDeckId}-${idx}`}
                   deckId={reqDeckId}
                   parentCardId={card.id}
                   sessionId={sessionId}
@@ -156,7 +199,7 @@ import { useState, useMemo, useEffect } from "react";
     );
   }
 
-  function NestedDeckNav({ 
+function NestedDeckNav({ 
     deckId, sessionId, parentCardId, onBack 
   }: { 
     deckId: number, sessionId: number, parentCardId: number, onBack: () => void 
