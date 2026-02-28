@@ -59,6 +59,20 @@ function NestedDeckNav({
     );
   }
 
+  const handleNestedCardClick = (card: any) => {
+    // Immediately save empty note for nested card to establish connection
+    saveNote.mutate({ 
+      sessionId, 
+      cardId: card.id, 
+      content: "", 
+      parentId: parentCardId 
+    }, {
+      onSuccess: () => {
+        setSelectedCard(card);
+      }
+    });
+  };
+
   return (
     <div className="space-y-4 h-full flex flex-col">
       <div className="flex items-center gap-3">
@@ -69,7 +83,7 @@ function NestedDeckNav({
         {cards.map((card) => (
           <div 
             key={card.id}
-            onClick={() => setSelectedCard(card)}
+            onClick={() => handleNestedCardClick(card)}
             className="aspect-[2/3] rounded-lg border border-primary/30 cursor-pointer shadow-md"
             style={{ backgroundImage: `url(${deck.coverImage})`, backgroundSize: 'cover' }}
           />
@@ -97,6 +111,7 @@ function CardNoteDetail({
 }: { 
   card: any, sessionId: number, parentId?: number | null, onClose: () => void 
 }) {
+  const [, setLocation] = useLocation();
   const { data: notes } = useNotesBySession(sessionId);
   const { data: allDecks } = useDecks();
   const saveNote = useSaveNote();
@@ -134,18 +149,24 @@ function CardNoteDetail({
   }, [notes, parentId]);
 
   const handleSave = () => {
-    if (content === existingNote?.content) {
-      onClose();
+    const isChanged = content !== existingNote?.content;
+    
+    if (!isChanged) {
+      if (parentId === null) {
+        setLocation(`/session/${sessionId}`);
+      } else {
+        onClose();
+      }
       return;
     }
 
     saveNote.mutate({ sessionId, cardId: card.id, content, parentId }, {
       onSuccess: () => {
-        setIsSaved(true);
-        setTimeout(() => {
-          setIsSaved(false);
+        if (parentId === null) {
+          setLocation(`/session/${sessionId}`);
+        } else {
           onClose();
-        }, 500);
+        }
       }
     });
   };
@@ -239,7 +260,7 @@ export default function CardSelector() {
 
   const { data: deck, isLoading: deckLoading } = useDeck(deckId);
   const { data: cards, isLoading: cardsLoading } = useCardsByDeck(deckId);
-  const { data: notes } = useNotesBySession(sessionId);
+  const { data: notes, isLoading: notesLoading } = useNotesBySession(sessionId);
   const { data: session, isLoading: sessionLoading } = useSession(sessionId);
   const { data: goals, isLoading: goalsLoading } = useGoals();
   const saveNote = useSaveNote();
@@ -290,8 +311,15 @@ export default function CardSelector() {
     return [...cards].sort(() => Math.random() - 0.5);
   }, [cards]);
 
-  const [flippedCards, setFlippedCards] = useState<Set<number>>(new Set());
-  const [activeCard, setActiveCard] = useState<any | null>(null);
+  // Sync initial state: if a card is already chosen for this deck, open it
+  useEffect(() => {
+    if (!deckLoading && !cardsLoading && !notesLoading && chosenRootCardId && !activeCard && !isChoosingId) {
+      const card = cards?.find(c => c.id === chosenRootCardId);
+      if (card) {
+        setActiveCard(card);
+      }
+    }
+  }, [deckLoading, cardsLoading, notesLoading, chosenRootCardId, cards, activeCard, isChoosingId]);
 
   const handleCardClick = (card: any) => {
     // If we already have a root choice, strictly prohibit opening ANY other card
@@ -320,13 +348,6 @@ export default function CardSelector() {
     } else {
       setActiveCard(card);
     }
-
-    // Update flipped cards locally for immediate visual feedback
-    setFlippedCards(prev => {
-      const next = new Set(prev);
-      next.add(card.id);
-      return next;
-    });
   };
 
   if (deckLoading || cardsLoading) return <MobileLayout><div className="text-center mt-20">Тасуем колоду...</div></MobileLayout>;
