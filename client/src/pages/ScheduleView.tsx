@@ -92,6 +92,9 @@ export default function ScheduleView() {
                 <div className="flex items-start justify-between relative z-10">
                   <div className="space-y-1 pr-4">
                     <div className="flex items-center gap-2">
+                      <span className="text-xs font-bold px-2 py-1 rounded bg-secondary text-secondary-foreground">
+                        День {session.number}
+                      </span>
                       {isCompleted && <CheckCircle2 className="w-4 h-4 text-green-500" />}
                     </div>
                     <h4 className={`font-display text-lg font-bold ${isAvailable ? 'text-primary' : 'text-foreground'}`}>

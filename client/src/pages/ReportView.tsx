@@ -85,9 +85,9 @@ export default function ReportView() {
           <div className="space-y-12 pt-4">
             {sessions.map((session) => (
               <div key={session.id} className="space-y-4 page-break-inside-avoid">
-                <div className="flex items-end gap-4 border-b border-black/10 pb-2">
-                  <h3 className="text-2xl font-display font-bold text-[#2b005e]">Сессия {session.number}: {session.name}</h3>
-                  <span className="text-sm text-gray-500 mb-1">{session.status === 'completed' ? 'Завершена' : 'В процессе'}</span>
+                <div className="flex flex-col border-b border-black/10 pb-2">
+                  <h3 className="text-2xl font-display font-bold text-[#2b005e]">День {session.number}: {session.name}</h3>
+                  <span className="text-sm text-gray-500">{session.status === 'completed' ? 'Завершена' : 'В процессе'}</span>
                 </div>
                 
                 {session.notes ? (

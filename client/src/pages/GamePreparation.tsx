@@ -130,6 +130,7 @@ export default function GamePreparation() {
                 <Button 
                   variant="outline"
                   onClick={() => {
+                    createGoal.mutate({ amount: "", question: "", status: "rejected" }); // Clear on server if needed, or just set rejected
                     setAmount("");
                     setStep("input");
                   }}

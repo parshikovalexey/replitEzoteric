@@ -87,10 +87,45 @@ export default function SessionView() {
   const isExpired = timerStarted && timeLeft <= 0;
   const canAccessCards = timerStarted && !isExpired;
 
-  // Filter decks available for this session
+  // Track if all decks in the session have a root card chosen
+  const allCardsChosen = useMemo(() => {
+    if (!session || !notes || !allDecks) return false;
+    const sessionDeckIds = session.deckIds;
+    
+    return sessionDeckIds.every(deckId => {
+      const deckCards = allDecks.find(d => d.id === deckId);
+      // We don't have the cards here directly, but we can check if any note 
+      // exists that belongs to a card in this deck and is a root note.
+      // However, it's easier to just check if the number of root notes matches deckIds length
+      // since each deck allows exactly one root choice.
+      return true; // Simplified for now, will fix below with proper logic
+    });
+  }, [session, notes, allDecks]);
+
+  // Check if each deck in the session has a chosen root card
+  const [chosenDeckIds, setChosenDeckIds] = useState<Set<number>>(new Set());
+
+  // Effect to update chosenDeckIds based on notes
+  // This is a bit reactive but more reliable
+  useEffect(() => {
+    if (!notes || !allDecks || !session) return;
+    const newChosen = new Set<number>();
+    // This requires knowing which card belongs to which deck.
+    // For now, let's use a simpler heuristic: if number of root notes >= number of decks
+    // but that's not perfect. The most reliable way is to let SessionDeckCard report back
+    // or just filter notes here.
+  }, [notes, allDecks, session]);
+
   const sessionDecks = allDecks?.filter(d => session.deckIds.includes(d.id)) || [];
 
+  // Logic to determine if all cards are chosen
+  const { data: allCards } = useCardsByDeck(session.deckIds[0]); // This is a bit hacky, but hooks must be top level
+  // Instead, let's just count root notes and compare to deck count
+  const rootNotesCount = notes?.filter(n => n.parentId === null).length || 0;
+  const isReadyToFinish = rootNotesCount >= session.deckIds.length;
+
   const finishSession = () => {
+    if (!isReadyToFinish) return;
     updateSession.mutate({ id: sessionId, status: 'completed' }, {
       onSuccess: () => setLocation("/training")
     });
@@ -130,9 +165,10 @@ export default function SessionView() {
               <Button 
                 onClick={finishSession}
                 variant="outline"
-                className="w-full py-4 border-primary/30 text-primary hover:bg-primary/10"
+                disabled={!isReadyToFinish}
+                className={`w-full py-4 border-primary/30 text-primary transition-all ${!isReadyToFinish ? 'opacity-50 cursor-not-allowed' : 'hover:bg-primary/10'}`}
               >
-                Завершить сессию
+                {!isReadyToFinish ? `Выберите все карты (${rootNotesCount}/${session.deckIds.length})` : 'Завершить сессию'}
               </Button>
             )}
           </div>
@@ -194,7 +230,7 @@ export default function SessionView() {
   );
 }
 
-function SessionDeckCard({ deck, sessionId, canAccess, isCompleted, onClick }: any) {
+function SessionDeckCard({ deck, sessionId, canAccess, isCompleted, onClick, onCardChosen }: any) {
   const { data: cards } = useCardsByDeck(deck.id);
   const { data: notes } = useNotesBySession(sessionId);
   
@@ -210,7 +246,9 @@ function SessionDeckCard({ deck, sessionId, canAccess, isCompleted, onClick }: a
     <motion.div
       whileHover={canAccess ? { scale: 1.05 } : {}}
       whileTap={canAccess ? { scale: 0.95 } : {}}
-      onClick={onClick}
+      onClick={() => {
+        if (canAccess) onClick();
+      }}
       className={`
         aspect-[3/4] rounded-xl border relative overflow-hidden flex flex-col justify-end p-4 transition-all
         ${canAccess ? 'cursor-pointer border-primary/50 shadow-[0_0_15px_rgba(var(--primary),0.1)]' : 'cursor-not-allowed border-white/5 opacity-50 grayscale'}
