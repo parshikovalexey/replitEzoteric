@@ -1,6 +1,6 @@
 import { useState, useEffect, useMemo } from "react";
 import { useRoute, useLocation } from "wouter";
-import { useSession, useDecks, useUpdateSession, useNotesBySession, useCardsByDeck, useSessions } from "@/hooks/use-game";
+import { useSession, useDecks, useUpdateSession, useNotesBySession, useCardsByDeck, useSessions, useGoals } from "@/hooks/use-game";
 import { MobileLayout } from "@/components/MobileLayout";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
@@ -15,16 +15,23 @@ export default function SessionView() {
   
   const { data: session, isLoading } = useSession(sessionId);
   const { data: sessions } = useSessions();
+  const { data: goals, isLoading: goalsLoading } = useGoals();
   
   // Check access
   useEffect(() => {
-    if (!isLoading && sessions) {
+    if (!isLoading && !goalsLoading && sessions && goals) {
+      // Redirect to goal creation if no goal exists
+      if (goals.length === 0) {
+        setLocation("/");
+        return;
+      }
+
       const currentSession = sessions.find(s => s.id === sessionId);
       if (!currentSession || currentSession.status === 'locked') {
         setLocation("/training");
       }
     }
-  }, [isLoading, sessions, sessionId, setLocation]);
+  }, [isLoading, goalsLoading, sessions, goals, sessionId, setLocation]);
 
   const { data: allDecks } = useDecks();
   const { data: notes } = useNotesBySession(sessionId);
