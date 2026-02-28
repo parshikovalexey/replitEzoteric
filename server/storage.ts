@@ -130,6 +130,17 @@ export class MemStorage implements IStorage {
     if (!session) throw new Error("Session not found");
     const updated = { ...session, ...updates };
     this.sessions.set(id, updated);
+
+    // Logic for unlocking next session
+    if (updates.status === 'completed') {
+      const nextSessionNumber = session.number + 1;
+      const nextSession = Array.from(this.sessions.values()).find(s => s.number === nextSessionNumber);
+      if (nextSession && nextSession.status === 'locked') {
+        nextSession.status = 'available';
+        this.sessions.set(nextSession.id, nextSession);
+      }
+    }
+
     return updated;
   }
 

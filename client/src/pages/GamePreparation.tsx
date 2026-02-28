@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useLocation } from "wouter";
 import { motion, AnimatePresence } from "framer-motion";
 import { useCreateGoal, useGoals } from "@/hooks/use-game";
@@ -17,14 +17,23 @@ const QUESTIONS = [
 export default function GamePreparation() {
   const [, setLocation] = useLocation();
   const createGoal = useCreateGoal();
+  const { data: goals } = useGoals();
   
-  const [step, setStep] = useState<"input" | "dice">("input");
+  const [step, setStep] = useState<"input" | "dice" | "warning">("input");
   const [amount, setAmount] = useState("");
   const [questionIndex, setQuestionIndex] = useState(0);
   const [evenCount, setEvenCount] = useState(0);
   const [rejected, setRejected] = useState(false);
   const [isProcessing, setIsProcessing] = useState(false);
   const [resultMessage, setResultMessage] = useState<string | null>(null);
+
+  const existingGoal = goals?.find(g => g.status === 'accepted');
+
+  useEffect(() => {
+    if (existingGoal && step === "input") {
+      setStep("warning");
+    }
+  }, [existingGoal]);
 
   const handleAmountSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -98,6 +107,37 @@ export default function GamePreparation() {
     <MobileLayout title="Постановка Цели">
       <div className="flex flex-col gap-8 h-full justify-center">
         <AnimatePresence mode="wait">
+          {step === "warning" && (
+            <motion.div
+              key="warning"
+              initial={{ opacity: 0, scale: 0.95 }}
+              animate={{ opacity: 1, scale: 1 }}
+              exit={{ opacity: 0, scale: 1.05 }}
+              className="glass-panel p-8 rounded-3xl flex flex-col gap-6 text-center"
+            >
+              <AlertCircle className="w-12 h-12 text-primary mx-auto" />
+              <div className="space-y-2">
+                <h2 className="font-display text-2xl font-bold text-foreground">У вас уже есть цель</h2>
+                <p className="text-muted-foreground text-sm">Желаете продолжить с текущей целью или начать заново?</p>
+              </div>
+              <div className="space-y-3">
+                <Button 
+                  onClick={() => setLocation("/training")}
+                  className="w-full py-6 text-lg font-bold bg-primary text-primary-foreground rounded-xl"
+                >
+                  Продолжить
+                </Button>
+                <Button 
+                  variant="outline"
+                  onClick={() => setStep("input")}
+                  className="w-full py-6 text-lg border-primary/30 text-primary"
+                >
+                  Начать заново
+                </Button>
+              </div>
+            </motion.div>
+          )}
+
           {step === "input" && (
             <motion.div 
               key="input"

@@ -58,7 +58,7 @@ export function useSession(id: number) {
 export function useUpdateSession() {
   const queryClient = useQueryClient();
   return useMutation({
-    mutationFn: async ({ id, ...data }: { id: number; status?: string; notes?: string }) => {
+    mutationFn: async ({ id, ...data }: { id: number; status?: string; notes?: string; startTime?: string }) => {
       const url = buildUrl(api.sessions.update.path, { id });
       const res = await fetch(url, {
         method: api.sessions.update.method,

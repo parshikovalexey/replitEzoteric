@@ -23,12 +23,20 @@ export default function SessionView() {
   const [timeLeft, setTimeLeft] = useState(0);
   const [notesText, setNotes] = useState("");
 
-  // Sync initial notes
+  // Sync initial notes and timer
   useEffect(() => {
     if (session && session.notes) setNotes(session.notes);
     if (session?.status === 'in_progress' || session?.status === 'completed') {
       setTimerStarted(true);
-      setTimeLeft(session.timerMinutes * 60);
+      if (session.startTime) {
+        const start = new Date(session.startTime).getTime();
+        const now = new Date().getTime();
+        const elapsed = Math.floor((now - start) / 1000);
+        const total = (session.timerMinutes || 30) * 60;
+        setTimeLeft(Math.max(0, total - elapsed));
+      } else {
+        setTimeLeft((session.timerMinutes || 30) * 60);
+      }
     }
   }, [session]);
 
@@ -67,8 +75,13 @@ export default function SessionView() {
   const startSession = () => {
     setShowWarning(false);
     setTimerStarted(true);
-    setTimeLeft(session.timerMinutes * 60);
-    updateSession.mutate({ id: sessionId, status: 'in_progress' });
+    const totalSeconds = (session.timerMinutes || 30) * 60;
+    setTimeLeft(totalSeconds);
+    updateSession.mutate({ 
+      id: sessionId, 
+      status: 'in_progress',
+      startTime: new Date().toISOString()
+    });
   };
 
   const isExpired = timerStarted && timeLeft <= 0;

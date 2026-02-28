@@ -33,6 +33,7 @@ export const sessions = pgTable("sessions", {
   status: text("status").notNull().default('locked'), // 'locked', 'available', 'in_progress', 'completed'
   notes: text("notes").default(''),
   timerMinutes: integer("timer_minutes").notNull().default(30),
+  startTime: text("start_time"), // ISO string of when the session actually started
   deckIds: integer("deck_ids").array().notNull(),
 });
 

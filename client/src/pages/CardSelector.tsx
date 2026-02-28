@@ -9,6 +9,34 @@ import { Drawer, DrawerContent, DrawerHeader, DrawerTitle, DrawerDescription } f
 import { Textarea } from "@/components/ui/textarea";
 
 // Recursive Deck Navigation Component inside the Drawer
+function NestedDeckItem({ deckId, parentCardId, sessionId, onClick }: any) {
+  const { data: allDecks } = useDecks();
+  const { data: notes } = useNotesBySession(sessionId);
+  const { data: deckCards } = useCardsByDeck(deckId);
+  const deck = allDecks?.find(d => d.id === deckId);
+  
+  const isChosen = useMemo(() => {
+    if (!notes || !deckCards) return false;
+    const cardIds = deckCards.map(c => c.id);
+    return notes.some(n => n.parentId === parentCardId && cardIds.includes(n.cardId));
+  }, [notes, deckCards, parentCardId]);
+
+  return (
+    <Button 
+      variant="outline" 
+      className={`shrink-0 h-16 w-12 p-0 border-primary/50 bg-card hover:bg-primary/20 relative overflow-hidden ${isChosen ? 'ring-2 ring-primary ring-offset-2 ring-offset-background' : ''}`}
+      onClick={onClick}
+    >
+      <div className="absolute inset-0 bg-primary/10 flex items-center justify-center z-10">
+        <span className="text-xs font-bold font-mono text-primary">{isChosen ? <Check className="w-4 h-4" /> : 'N'}</span>
+      </div>
+      {deck?.coverImage && (
+        <img src={deck.coverImage} className="absolute inset-0 w-full h-full object-cover opacity-30" alt="" />
+      )}
+    </Button>
+  );
+}
+
 function NestedDeckNav({ 
   deckId, sessionId, parentCardId, onBack 
 }: { 
@@ -143,24 +171,15 @@ function CardNoteDetail({
         <div className="space-y-2 pt-2 border-t border-white/10">
           <p className="text-sm font-semibold text-primary">Требуются дополнительные карты:</p>
           <div className="flex gap-2 overflow-x-auto pb-2 no-scrollbar">
-            {card.requiredDecks.map((reqDeckId: number) => {
-              const reqDeck = allDecks?.find(d => d.id === reqDeckId);
-              return (
-                <Button 
-                  key={reqDeckId} 
-                  variant="outline" 
-                  className="shrink-0 h-16 w-12 p-0 border-primary/50 bg-card hover:bg-primary/20 relative overflow-hidden"
-                  onClick={() => setActiveNestedDeck(reqDeckId)}
-                >
-                  <div className="absolute inset-0 bg-primary/10 flex items-center justify-center z-10">
-                    <span className="text-xs font-bold font-mono text-primary">N</span>
-                  </div>
-                  {reqDeck?.coverImage && (
-                    <img src={reqDeck.coverImage} className="absolute inset-0 w-full h-full object-cover opacity-30" alt="" />
-                  )}
-                </Button>
-              );
-            })}
+            {card.requiredDecks.map((reqDeckId: number) => (
+              <NestedDeckItem 
+                key={reqDeckId}
+                deckId={reqDeckId}
+                parentCardId={card.id}
+                sessionId={sessionId}
+                onClick={() => setActiveNestedDeck(reqDeckId)}
+              />
+            ))}
           </div>
         </div>
       )}
