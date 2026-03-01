@@ -74,14 +74,7 @@ export default function SessionView() {
     return () => clearInterval(interval);
   }, [timerStarted, timeLeft, session?.status, sessionId, updateSession]);
 
-  // Auto-save notes debounce
-  useEffect(() => {
-    if (!session || notesText === session.notes) return;
-    const timeout = setTimeout(() => {
-      updateSession.mutate({ id: sessionId, notes: notesText });
-    }, 1500);
-    return () => clearTimeout(timeout);
-  }, [notesText, sessionId, session, updateSession]);
+  
 
   if (isLoading || !session) return <MobileLayout><div className="animate-pulse flex justify-center mt-20">Загрузка...</div></MobileLayout>;
 
