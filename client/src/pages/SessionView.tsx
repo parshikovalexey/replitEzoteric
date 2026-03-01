@@ -187,12 +187,12 @@ export default function SessionView() {
             className="min-h-[200px] glass-panel border-primary/20 bg-background/50 text-base resize-none focus-visible:ring-primary/30"
           />
             <Button 
-              onClick={() => updateSession.mutate({ id: sessionId, notes: notesText })}
-              className="w-full bg-primary/20 text-primary border border-primary/30 hover:bg-primary/30 mt-2"
-              data-testid="button-save-session-note"
-            >
-              Сохранить заметку сессии
-            </Button>
+                onClick={() => updateSession.mutate({ id: sessionId, notes: notesText })}
+                className="w-full bg-primary text-primary-foreground hover:bg-primary/90 mt-4"
+                data-testid="button-save-session-note"
+              >
+                Сохранить
+              </Button>
           
         </div>
       </div>
