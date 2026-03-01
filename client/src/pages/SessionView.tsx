@@ -107,7 +107,7 @@ export default function SessionView() {
 
   const finishSession = () => {
     if (!isReadyToFinish) return;
-    updateSession.mutate({ id: sessionId, status: 'completed' }, {
+    updateSession.mutate({ id: sessionId, status: 'completed', notes: notesText }, {
       onSuccess: () => setLocation("/training")
     });
   };
@@ -186,6 +186,13 @@ export default function SessionView() {
             placeholder="Ваши инсайты, выводы и мысли по итогу сессии..."
             className="min-h-[200px] glass-panel border-primary/20 bg-background/50 text-base resize-none focus-visible:ring-primary/30"
           />
+            <Button 
+              onClick={() => updateSession.mutate({ id: sessionId, notes: notesText })}
+              className="w-full bg-primary/20 text-primary border border-primary/30 hover:bg-primary/30 mt-2"
+              data-testid="button-save-session-note"
+            >
+              Сохранить заметку сессии
+            </Button>
           
         </div>
       </div>
