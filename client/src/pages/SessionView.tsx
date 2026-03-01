@@ -126,10 +126,12 @@ export default function SessionView() {
         <div className="glass-panel p-6 rounded-3xl flex flex-col items-center text-center space-y-4">
           <h2 className="font-display text-2xl font-bold text-primary">{session.name}</h2>
           
-          <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-background/50 border border-primary/30 text-xl font-mono text-primary">
-            <Clock className="w-5 h-5" />
-            {timerStarted ? formatTime(timeLeft) : `${session.timerMinutes}:00`}
-          </div>
+          {session.status !== 'completed' && (
+              <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-background/50 border border-primary/30 text-xl font-mono text-primary">
+                <Clock className="w-5 h-5" />
+                {timerStarted ? formatTime(timeLeft) : `${session.timerMinutes}:00`}
+              </div>
+            )}
 
           <div className="flex flex-col w-full gap-2">
             {!timerStarted && (
