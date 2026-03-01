@@ -65,7 +65,7 @@ export default function SessionView() {
     const interval = setInterval(() => {
       setTimeLeft(prev => {
         if (prev <= 1) {
-          updateSession.mutate({ id: sessionId, status: 'completed' });
+          updateSession.mutate({ id: sessionId, status: 'completed', notes: notesText });
           return 0;
         }
         return prev - 1;
@@ -186,7 +186,7 @@ export default function SessionView() {
             placeholder="Ваши инсайты, выводы и мысли по итогу сессии..."
             className="min-h-[200px] glass-panel border-primary/20 bg-background/50 text-base resize-none focus-visible:ring-primary/30"
           />
-          <p className="text-xs text-muted-foreground text-right">Сохраняется автоматически</p>
+          
         </div>
       </div>
 
