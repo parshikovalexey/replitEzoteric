@@ -5,7 +5,7 @@ import { MobileLayout } from "@/components/MobileLayout";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { Dialog, DialogContent, DialogDescription, DialogTitle } from "@/components/ui/dialog";
-import { Clock, PlayCircle, Lock, ArrowLeft, CheckCircle2, X } from "lucide-react";
+import { Clock, PlayCircle, Lock, ArrowLeft, CheckCircle2, X, ChevronRight } from "lucide-react";
 import { motion } from "framer-motion";
 
 export default function SessionView() {
@@ -36,6 +36,40 @@ export default function SessionView() {
   const { data: allDecks } = useDecks();
   const { data: notes } = useNotesBySession(sessionId);
   const updateSession = useUpdateSession();
+
+  const [isExpanded, setIsExpanded] = useState(false);
+
+    const getChildNotes = (parentCardId: number, currentNotes: any[]): string[] => {
+      const children = currentNotes.filter(n => n.parentId === parentCardId);
+      let results: string[] = [];
+      for (const child of children) {
+        if (child.content && child.content.trim()) {
+          results.push(child.content.trim());
+        }
+        results = [...results, ...getChildNotes(child.cardId, currentNotes)];
+      }
+      return results;
+    };
+
+    const aggregatedAllNotes = useMemo(() => {
+      if (!notes) return "";
+      // In session view, we aggregate notes from ALL root cards
+      const rootNotes = notes.filter(n => n.parentId === null);
+      let allNestedNotes: string[] = [];
+      
+      for (const root of rootNotes) {
+        // Add root note content itself if we want, but the user said "from nested cards"
+        // However, usually we want to see everything that isn't the session note itself.
+        // CardSelector logic aggregates from children of current card.
+        // In session view, root cards ARE the "top level" of cards.
+        if (root.content && root.content.trim()) {
+          allNestedNotes.push(root.content.trim());
+        }
+        allNestedNotes = [...allNestedNotes, ...getChildNotes(root.cardId, notes)];
+      }
+      return allNestedNotes.join('\n\n');
+    }, [notes]);
+  
 
   const [showWarning, setShowWarning] = useState(false);
   const [timerStarted, setTimerStarted] = useState(false);
@@ -179,15 +213,34 @@ export default function SessionView() {
           </div>
         </div>
 
-        {/* Session Notes */}
-        <div className="space-y-3 pt-4">
-          <h3 className="font-display text-xl text-foreground ml-2">Заметки по сессии</h3>
-          <Textarea 
-            value={notesText}
-            onChange={(e) => setNotes(e.target.value)}
-            placeholder="Ваши инсайты, выводы и мысли по итогу сессии..."
-            className="min-h-[200px] glass-panel border-primary/20 bg-background/50 text-base resize-none focus-visible:ring-primary/30"
-          />
+        
+          {/* Session Notes */}
+          <div className="space-y-3 pt-4">
+            <h3 className="font-display text-xl text-foreground ml-2">Заметки по сессии</h3>
+            
+            {aggregatedAllNotes && (
+              <div className="relative p-3 bg-primary/5 border border-primary/20 rounded-lg overflow-hidden transition-all duration-300">
+                 <h4 className="text-[10px] font-bold text-primary uppercase tracking-wider mb-1">Заметки из карт</h4>
+                 <div className={`text-sm text-foreground/90 whitespace-pre-wrap leading-relaxed ${!isExpanded ? 'line-clamp-4' : ''}`}>
+                   {aggregatedAllNotes}
+                 </div>
+                 <Button 
+                   variant="ghost" 
+                   size="icon" 
+                   className="absolute bottom-1 right-1 h-6 w-6 text-primary hover:bg-primary/20"
+                   onClick={() => setIsExpanded(!isExpanded)}
+                 >
+                   <ChevronRight className={`w-4 h-4 transition-transform duration-300 ${isExpanded ? '-rotate-90' : 'rotate-90'}`} />
+                 </Button>
+              </div>
+            )}
+
+            <Textarea 
+              value={notesText}
+              onChange={(e) => setNotes(e.target.value)}
+              placeholder="Ваши инсайты, выводы и мысли по итогу сессии..."
+              className="min-h-[200px] glass-panel border-primary/20 bg-background/50 text-base resize-none focus-visible:ring-primary/30 custom-scrollbar"
+            />
             <Button 
                 onClick={() => updateSession.mutate({ id: sessionId, notes: notesText })}
                 className="w-full bg-primary text-primary-foreground hover:bg-primary/90 mt-4"
