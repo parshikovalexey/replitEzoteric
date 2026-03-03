@@ -2,9 +2,25 @@ import express, { type Request, Response, NextFunction } from "express";
 import { registerRoutes } from "./routes";
 import { serveStatic } from "./static";
 import { createServer } from "http";
+import cors from "cors";
 
 const app = express();
 const httpServer = createServer(app);
+
+/*app.use(cors({
+  origin: [
+    'http://localhost:5000',
+    'http://localhost:3000',
+    'https://vk.com',
+    'https://*.vk.com',
+    /^https:\/\/.*\.vk\.com$/,
+    /^https:\/\/.*\.vk-apps\.com$/,
+    'https://88d1z0xp-5000.euw.devtunnels.ms', // замените на ваш туннель
+  ],
+  credentials: true,
+  methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS'],
+  allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With']
+}));*/
 
 declare module "http" {
   interface IncomingMessage {
@@ -90,7 +106,11 @@ app.use((req, res, next) => {
   // this serves both the API and the client.
   // It is the only port that is not firewalled.
   const port = parseInt(process.env.PORT || "5000", 10);
-  httpServer.listen(
+//  httpServer.listen(port, '0.0.0.0', () => {
+//    console.log('Server running on port 5000');
+//  });
+
+   httpServer.listen(
     {
       port,
       host: "0.0.0.0",

@@ -3,6 +3,7 @@ import { queryClient } from "./lib/queryClient";
 import { QueryClientProvider } from "@tanstack/react-query";
 import { Toaster } from "@/components/ui/toaster";
 import { TooltipProvider } from "@/components/ui/tooltip";
+import { useVKBridge } from "./hooks/useVKBridge";
 
 import GamePreparation from "./pages/GamePreparation";
 import ScheduleView from "./pages/ScheduleView";
@@ -25,6 +26,31 @@ function Router() {
 }
 
 function App() {
+  const { user, isInitialized, isMock } = useVKBridge();
+
+  if (!isInitialized) {
+    return (
+      <div style={{
+        display: 'flex',
+        justifyContent: 'center',
+        alignItems: 'center',
+        height: '100vh',
+        background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+        color: 'white'
+      }}>
+        <div style={{ textAlign: 'center' }}>
+          <h2>✨ Эзотерический тренинг</h2>
+          <p>Инициализация...</p>
+          {isMock && <p style={{ fontSize: '12px', opacity: 0.7 }}>Режим разработки</p>}
+        </div>
+      </div>
+    );
+  }
+
+  // Для отладки показываем информацию о пользователе в консоли
+  console.log('Приложение запущено, пользователь:', user);
+  console.log('Режим:', isMock ? 'mock' : 'реальный VK');
+
   return (
     <QueryClientProvider client={queryClient}>
       <TooltipProvider>
