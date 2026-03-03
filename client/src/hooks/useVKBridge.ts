@@ -3,7 +3,7 @@ import bridge from '@vkontakte/vk-bridge';
 import bridgeMock from '@vkontakte/vk-bridge-mock';
 
 // Определяем, используем ли мы mock
-const USE_MOCK = true; // Поставим true для разработки
+const USE_MOCK = false; // Поставим true для разработки
 
 // Моковые данные пользователя
 const MOCK_USER = {
