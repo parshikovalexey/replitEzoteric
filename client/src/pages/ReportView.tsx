@@ -80,12 +80,15 @@ import { useRef, useState, useMemo, useEffect } from "react";
     const goal = goals?.[goals.length - 1];
 
     useEffect(() => {
+      // Temporarily disabled for testing
+      /*
       if (sessions && sessions.length > 0) {
         const isFinished = sessions.every(s => s.status === 'completed');
         if (!isFinished) {
           setLocation("/");
         }
       }
+      */
     }, [sessions, setLocation]);
     
     const handleExportPDF = async () => {

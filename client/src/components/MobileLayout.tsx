@@ -1,9 +1,13 @@
 import { ReactNode } from "react";
 import { ThemeSwitcher } from "./ThemeSwitcher";
 import { useGoals } from "@/hooks/use-game";
+import { useLocation } from "wouter";
+import { FileText } from "lucide-react";
+import { Button } from "./ui/button";
 
 export function MobileLayout({ children, title, action }: { children: ReactNode; title?: string; action?: ReactNode }) {
   const { data: goals } = useGoals();
+  const [location, setLocation] = useLocation();
   const currentGoal = goals?.[goals.length - 1];
 
   return (
@@ -18,6 +22,15 @@ export function MobileLayout({ children, title, action }: { children: ReactNode;
               {title && <h1 className="font-display text-xl font-bold text-primary glow-text">{title}</h1>}
             </div>
             <div className="flex items-center gap-2">
+              <Button 
+                variant="ghost" 
+                size="icon" 
+                onClick={() => setLocation("/report")}
+                className="text-primary/60 hover:text-primary hover:bg-white/5"
+                title="Отчет"
+              >
+                <FileText className="w-5 h-5" />
+              </Button>
               {action}
               <ThemeSwitcher />
             </div>
