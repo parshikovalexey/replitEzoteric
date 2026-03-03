@@ -95,17 +95,36 @@ import { useRef, useState, useMemo, useEffect } from "react";
       if (!printRef.current) return;
       setIsExporting(true);
       try {
-        const canvas = await html2canvas(printRef.current, {
+        const element = printRef.current;
+        const canvas = await html2canvas(element, {
           scale: 2,
           useCORS: true,
-          backgroundColor: '#ffffff'
+          backgroundColor: '#ffffff',
+          windowWidth: element.scrollWidth,
+          windowHeight: element.scrollHeight
         });
+        
         const imgData = canvas.toDataURL('image/png');
         const pdf = new jsPDF('p', 'mm', 'a4');
         const pdfWidth = pdf.internal.pageSize.getWidth();
-        const pdfHeight = (canvas.height * pdfWidth) / canvas.width;
+        const pdfHeight = pdf.internal.pageSize.getHeight();
         
-        pdf.addImage(imgData, 'PNG', 0, 0, pdfWidth, pdfHeight);
+        const imgProps = pdf.getImageProperties(imgData);
+        const imgHeight = (imgProps.height * pdfWidth) / imgProps.width;
+        
+        let heightLeft = imgHeight;
+        let position = 0;
+
+        pdf.addImage(imgData, 'PNG', 0, position, pdfWidth, imgHeight);
+        heightLeft -= pdfHeight;
+
+        while (heightLeft >= 0) {
+          position = heightLeft - imgHeight;
+          pdf.addPage();
+          pdf.addImage(imgData, 'PNG', 0, position, pdfWidth, imgHeight);
+          heightLeft -= pdfHeight;
+        }
+        
         pdf.save(`transform-report-${format(new Date(), 'dd-MM-yyyy')}.pdf`);
       } catch (err) {
         console.error(err);
@@ -133,7 +152,7 @@ import { useRef, useState, useMemo, useEffect } from "react";
         </header>
 
         <div className="max-w-[210mm] mx-auto bg-white text-black p-10 md:p-20 shadow-2xl my-8 print:my-0 print:shadow-none print:p-0">
-          <div ref={printRef} className="space-y-12 bg-white text-black font-sans">
+          <div id="report-content" ref={printRef} className="space-y-12 bg-white text-black font-sans">
             
             <div className="text-center space-y-4 pb-8 border-b-2 border-black/10">
               <h1 className="font-display text-4xl font-bold text-[#2b005e]">Трансформационный Отчет</h1>

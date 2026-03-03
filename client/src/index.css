@@ -215,3 +215,26 @@
   0% { transform: rotate(0deg); }
   100% { transform: rotate(360deg); }
 }
+
+  @media print {
+    body {
+      background: white !important;
+      padding: 0 !important;
+      margin: 0 !important;
+    }
+    .print:hidden {
+      display: none !important;
+    }
+    .page-break-inside-avoid {
+      page-break-inside: avoid;
+    }
+    /* Ensure padding is preserved in print */
+    #report-content {
+      padding: 20mm !important;
+      width: 210mm !important;
+      margin: 0 auto !important;
+      box-shadow: none !important;
+      background: white !important;
+      color: black !important;
+    }
+  }
