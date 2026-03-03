@@ -188,7 +188,7 @@ import { useState, useMemo, useEffect } from "react";
           <Textarea 
             value={content}
             onChange={(e) => setContent(e.target.value)}
-            className="flex-1 min-h-[100px] resize-none bg-background/50 border-white/10 focus-visible:ring-primary/50"
+            className="flex-1 min-h-[100px] resize-none bg-background/50 border-white/10 focus-visible:ring-primary/50 custom-scrollbar"
             placeholder="Опишите свои мысли..."
           />
           <Button onClick={handleSave} className="w-full bg-primary text-primary-foreground hover:bg-primary/90">
