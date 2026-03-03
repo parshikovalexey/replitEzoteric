@@ -35,7 +35,7 @@ import { useRef, useState, useMemo, useEffect } from "react";
     
     if (!card) return null;
 
-    // Find children of THIS specific card in THIS specific slot
+    // Find children of THIS specific card
     const children = notes.filter(n => n.parentId === cardId);
 
     return (
