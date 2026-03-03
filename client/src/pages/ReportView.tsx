@@ -140,8 +140,7 @@ import { useRef, useState, useMemo, useEffect } from "react";
             </div>
 
             <div className="bg-[#f8f9fa] p-6 rounded-xl border border-[#e9ecef]">
-              <h2 className="text-sm font-bold text-[#2b005e] mb-2 uppercase tracking-wide opacity-60">Главное намерение</h2>
-              <p className="text-2xl font-serif">Хочу иметь личный доход <span className="font-bold text-[#d4af37]">{goal.amount}</span> в год</p>
+              <p className="text-2xl font-serif text-center">Что мне может помешать выйти на личный доход в размере <span className="font-bold text-[#d4af37]">{goal.amount}</span> в год?</p>
             </div>
 
             <div className="space-y-20 pt-4">

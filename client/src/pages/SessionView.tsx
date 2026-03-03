@@ -178,16 +178,7 @@ export default function SessionView() {
               </Button>
             )}
             
-            {timerStarted && session.status !== 'completed' && (
-              <Button 
-                onClick={finishSession}
-                variant="outline"
-                disabled={!isReadyToFinish}
-                className={`w-full py-4 border-primary/30 text-primary transition-all ${!isReadyToFinish ? 'opacity-50 cursor-not-allowed' : 'hover:bg-primary/10'}`}
-              >
-                {!isReadyToFinish ? `Выберите все карты (${rootNotesCount}/${session.deckIds.length})` : 'Завершить сессию'}
-              </Button>
-            )}
+            
           </div>
           {isExpired && (
             <div className="text-destructive font-bold text-sm bg-destructive/10 px-4 py-2 rounded-lg">
@@ -241,13 +232,24 @@ export default function SessionView() {
               placeholder="Ваши инсайты, выводы и мысли по итогу сессии..."
               className="min-h-[200px] glass-panel border-primary/20 bg-background/50 text-base resize-none focus-visible:ring-primary/30 custom-scrollbar"
             />
-            <Button 
-                onClick={() => updateSession.mutate({ id: sessionId, notes: notesText })}
-                className="w-full bg-primary text-primary-foreground hover:bg-primary/90 mt-4"
-                data-testid="button-save-session-note"
-              >
-                Сохранить
-              </Button>
+            
+              {isReadyToFinish && notesText.length >= 3 ? (
+                <Button 
+                  onClick={finishSession}
+                  className="w-full bg-primary text-primary-foreground hover:bg-primary/90 mt-4"
+                  data-testid="button-finish-session"
+                >
+                  Сохранить и завершить сессию
+                </Button>
+              ) : !isReadyToFinish && notesText.length >= 2 ? (
+                <Button 
+                  onClick={() => updateSession.mutate({ id: sessionId, notes: notesText })}
+                  className="w-full bg-primary text-primary-foreground hover:bg-primary/90 mt-4"
+                  data-testid="button-save-session-note"
+                >
+                  Сохранить
+                </Button>
+              ) : null}
           
         </div>
       </div>
