@@ -143,7 +143,7 @@ import { useRef, useState, useMemo, useEffect } from "react";
             </div>
 
             <div className="bg-[#f8f9fa] p-6 rounded-xl border border-[#e9ecef]">
-              <p className="text-2xl font-serif text-center">Что мне может помешать выйти на личный доход в размере <span className="font-bold text-[#d4af37]">{goal.amount}</span> в год?</p>
+              <p className="text-2xl font-serif text-center">{goal.question}</p>
             </div>
 
             <div className="space-y-20 pt-4">
