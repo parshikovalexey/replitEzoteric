@@ -61,6 +61,7 @@ import { useState, useMemo, useEffect } from "react";
 
 
   
+  
   function CardNoteDetail({ 
     card, sessionId, parentId = null, slotIndex = null, onClose 
   }: { 
@@ -73,6 +74,7 @@ import { useState, useMemo, useEffect } from "react";
     const existingNote = notes?.find(n => n.cardId === card.id && n.parentId === parentId && n.slotIndex === (slotIndex ?? null));
     const [content, setContent] = useState(existingNote?.content || "");
     const [activeSlot, setActiveSlot] = useState<{deckId: number, index: number} | null>(null);
+    const [isExpanded, setIsExpanded] = useState(false);
 
     useEffect(() => {
       if (existingNote && !content) {
@@ -101,8 +103,8 @@ import { useState, useMemo, useEffect } from "react";
     }, [notes, card.id]);
 
     const handleSave = () => {
-      const isChanged = content !== existingNote?.content;
-      if (!isChanged) {
+      // Immediate close if no changes, otherwise save and close
+      if (content === (existingNote?.content || "")) {
         if (parentId === null) setLocation(`/session/${sessionId}`);
         else onClose();
         return;
@@ -115,14 +117,6 @@ import { useState, useMemo, useEffect } from "react";
         }
       });
     };
-
-    useEffect(() => {
-      return () => {
-        if (content !== existingNote?.content && (content.trim() || existingNote)) {
-          saveNote.mutate({ sessionId, cardId: card.id, content, parentId, slotIndex });
-        }
-      };
-    }, [content, existingNote, sessionId, card.id, parentId, slotIndex]);
 
     if (activeSlot) {
       return (
@@ -158,11 +152,19 @@ import { useState, useMemo, useEffect } from "react";
         </div>
 
         {aggregatedChildNotes && (
-          <div className="p-3 bg-primary/5 border border-primary/20 rounded-lg space-y-2">
-             <h4 className="text-[10px] font-bold text-primary uppercase tracking-wider">Заметки из вложенных карт</h4>
-             <div className="text-sm text-foreground/90 whitespace-pre-wrap leading-relaxed">
+          <div className="relative p-3 bg-primary/5 border border-primary/20 rounded-lg overflow-hidden transition-all duration-300">
+             <h4 className="text-[10px] font-bold text-primary uppercase tracking-wider mb-1">Заметки из вложенных карт</h4>
+             <div className={`text-sm text-foreground/90 whitespace-pre-wrap leading-relaxed ${!isExpanded ? 'line-clamp-4' : ''}`}>
                {aggregatedChildNotes}
              </div>
+             <Button 
+               variant="ghost" 
+               size="icon" 
+               className="absolute bottom-1 right-1 h-6 w-6 text-primary hover:bg-primary/20"
+               onClick={() => setIsExpanded(!isExpanded)}
+             >
+               <ChevronRight className={`w-4 h-4 transition-transform duration-300 ${isExpanded ? '-rotate-90' : 'rotate-90'}`} />
+             </Button>
           </div>
         )}
 
@@ -192,15 +194,14 @@ import { useState, useMemo, useEffect } from "react";
             placeholder="Опишите свои мысли..."
           />
           <Button onClick={handleSave} className="w-full bg-primary text-primary-foreground hover:bg-primary/90">
-            Сохранить заметку
+            Сохранить
           </Button>
         </div>
       </div>
     );
   }
   
-
-  function NestedDeckNav({ 
+function NestedDeckNav({ 
     deckId, sessionId, parentCardId, slotIndex, onBack 
   }: { 
     deckId: number, sessionId: number, parentCardId: number, slotIndex?: number, onBack: () => void 
