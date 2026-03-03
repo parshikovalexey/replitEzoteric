@@ -75,7 +75,7 @@ import { useRef, useState, useMemo, useEffect } from "react";
     const { data: allDecks } = useDecks();
     const { data: allCards } = useAllCards();
     const { data: allNotes } = useAllNotes();
-    const [isExporting, setIsExporting] = useState(false);
+    
 
     const goal = goals?.[goals.length - 1];
 
@@ -141,14 +141,14 @@ import { useRef, useState, useMemo, useEffect } from "react";
           <Button variant="ghost" onClick={() => setLocation("/training")}>
             <ArrowLeft className="w-5 h-5 mr-2" /> Назад
           </Button>
-          <div className="flex gap-2">
-            <Button variant="outline" onClick={() => window.print()} className="gap-2">
-              <Printer className="w-4 h-4" /> Печать
-            </Button>
-            <Button onClick={handleExportPDF} disabled={isExporting} className="gap-2 bg-primary">
-              <Download className="w-4 h-4" /> {isExporting ? 'Генерация...' : 'Сохранить PDF'}
-            </Button>
-          </div>
+          <div className="flex items-center gap-4">
+              <p className="text-sm text-muted-foreground hidden md:block">
+                Для скачивания PDF выберите "Сохранить как PDF" в меню печати
+              </p>
+              <Button variant="default" onClick={() => window.print()} className="gap-2 bg-primary hover:bg-primary/90">
+                <Printer className="w-4 h-4" /> Печать
+              </Button>
+            </div>
         </header>
 
         <div className="max-w-[210mm] mx-auto bg-white text-black p-10 md:p-20 shadow-2xl my-8 print:my-0 print:shadow-none print:p-0">
