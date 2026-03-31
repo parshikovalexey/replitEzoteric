@@ -12,7 +12,10 @@
     "build:static": "set VITE_STATIC_MODE=true && npx vite build",
     "start": "NODE_ENV=production node dist/index.cjs",
     "check": "tsc",
-    "db:push": "drizzle-kit push"
+    "db:push": "drizzle-kit push",
+    "predeploy": "npm run build:static",
+    "deploy": "vk-miniapps-deploy",
+    "deploy:static": "npm run build:static && vk-miniapps-deploy"
   },
   "dependencies": {
     "@hookform/resolvers": "^3.10.0",

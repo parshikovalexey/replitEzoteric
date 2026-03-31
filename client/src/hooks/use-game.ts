@@ -2,7 +2,7 @@ import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { gameDB } from "../lib/db";
 
 // Determine if we're using local IndexedDB (static mode)
-const USE_LOCAL_DB = import.meta.env.VITE_STATIC_MODE === 'true' || import.meta.env.DEV;
+const USE_LOCAL_DB = import.meta.env.VITE_STATIC_MODE || import.meta.env.DEV;
 
 console.log('[use-game] USE_LOCAL_DB:', USE_LOCAL_DB, 'VITE_STATIC_MODE:', import.meta.env.VITE_STATIC_MODE, 'DEV:', import.meta.env.DEV);
 
@@ -198,6 +198,7 @@ export function useSaveNote() {
     },
     onSuccess: (_, variables) => {
       queryClient.invalidateQueries({ queryKey: ['notes', variables.sessionId] });
+      queryClient.invalidateQueries({ queryKey: ['allNotes'] });
     },
   });
 }

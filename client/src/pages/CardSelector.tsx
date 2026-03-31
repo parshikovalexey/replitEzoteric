@@ -71,15 +71,13 @@ import { Textarea } from "@/components/ui/textarea";
     const saveNote = useSaveNote();
 
     const existingNote = notes?.find(n => n.cardId === card.id && n.parentId === parentId && n.slotIndex === (slotIndex ?? null));
-    const [content, setContent] = useState(existingNote?.content || "");
+    const [content, setContent] = useState("");
     const [activeSlot, setActiveSlot] = useState<{deckId: number, index: number} | null>(null);
     const [isExpanded, setIsExpanded] = useState(false);
 
     useEffect(() => {
-      if (existingNote && !content) {
-        setContent(existingNote.content);
-      }
-    }, [existingNote, content]);
+      setContent(existingNote?.content || "");
+    }, [existingNote?.content]);
 
     const hasNested = card.requiredDecks && card.requiredDecks.length > 0;
 
