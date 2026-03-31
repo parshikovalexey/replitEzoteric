@@ -2,8 +2,8 @@ import { useEffect, useState } from 'react';
 import bridge from '@vkontakte/vk-bridge';
 import bridgeMock from '@vkontakte/vk-bridge-mock';
 
-// Определяем, используем ли мы mock
-const USE_MOCK = false; // Поставим true для разработки
+// Определяем, используем ли мы mock, на основе режима разработки
+const USE_MOCK = import.meta.env.DEV;
 
 // Моковые данные пользователя
 const MOCK_USER = {
@@ -51,10 +51,10 @@ export function useVKBridge() {
   // Простые функции для работы с хранилищем
   const setStorage = async (key: string, value: any) => {
     try {
-      if (!USE_MOCK) {
-        await activeBridge.send('VKWebAppStorageSet', { key, value: JSON.stringify(value) });
-      } else {
+      if (USE_MOCK) {
         localStorage.setItem(key, JSON.stringify(value));
+      } else {
+        await bridge.send('VKWebAppStorageSet', { key, value: JSON.stringify(value) });
       }
     } catch (error) {
       console.error('Ошибка сохранения:', error);
@@ -63,12 +63,12 @@ export function useVKBridge() {
 
   const getStorage = async (key: string) => {
     try {
-      if (!USE_MOCK) {
-        const { keys } = await activeBridge.send('VKWebAppStorageGet', { keys: [key] });
-        return keys[0]?.value ? JSON.parse(keys[0].value) : null;
-      } else {
+      if (USE_MOCK) {
         const value = localStorage.getItem(key);
         return value ? JSON.parse(value) : null;
+      } else {
+        const { keys } = await bridge.send('VKWebAppStorageGet', { keys: [key] });
+        return keys[0]?.value ? JSON.parse(keys[0].value) : null;
       }
     } catch (error) {
       console.error('Ошибка загрузки:', error);
