@@ -15,7 +15,7 @@ const QUESTIONS = [
 ];
 
 export default function GamePreparation() {
-  const [, setLocation] = useLocation();
+  const [location, setLocation] = useLocation();
   const createGoal = useCreateGoal();
   const { data: goals } = useGoals();
   
@@ -27,13 +27,25 @@ export default function GamePreparation() {
   const [isProcessing, setIsProcessing] = useState(false);
   const [resultMessage, setResultMessage] = useState<string | null>(null);
 
-  const existingGoal = goals?.find(g => g.status === 'accepted');
+  const existingGoal = goals?.find((g: { status: string }) => g.status === 'accepted');
 
   useEffect(() => {
     if (existingGoal && step === "input") {
       setStep("warning");
     }
   }, [existingGoal]);
+
+  // Navigate when goal is successfully created
+  useEffect(() => {
+    if (createGoal.isSuccess && step === "dice") {
+      console.log('Goal created successfully, navigating to /training');
+      setLocation("/training");
+    }
+    if (createGoal.isError) {
+      console.error('Goal creation error:', createGoal.error);
+      setIsProcessing(false);
+    }
+  }, [createGoal.isSuccess, createGoal.isError]);
 
   const handleAmountSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -58,7 +70,7 @@ export default function GamePreparation() {
   const [rollValue, setRollValue] = useState<number | null>(null);
 
   const handleRoll = (value: number) => {
-    if (isProcessing) return;
+    if (isProcessing || createGoal.isPending) return;
     setRollValue(value);
     setIsProcessing(true);
     
@@ -68,11 +80,9 @@ export default function GamePreparation() {
       if (!isEven) {
         setResultMessage("Принято!");
         const finalQuestion = QUESTIONS[questionIndex].replace("{amount}", amount);
+        console.log('Creating goal with:', { amount, question: finalQuestion, status: "accepted" });
         setTimeout(() => {
-          createGoal.mutate(
-            { amount, question: finalQuestion, status: "accepted" },
-            { onSuccess: () => setLocation("/training") }
-          );
+          createGoal.mutate({ amount, question: finalQuestion, status: "accepted" });
         }, 1000);
       } else {
         const newEvenCount = evenCount + 1;

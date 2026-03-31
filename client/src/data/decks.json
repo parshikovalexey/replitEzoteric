@@ -1,0 +1,26 @@
+[
+  {
+    "id": 1,
+    "name": "Страхи",
+    "sphere": "Подсознание",
+    "coverImage": "https://images.unsplash.com/photo-1509248961158-e54f6934749c?w=400"
+  },
+  {
+    "id": 2,
+    "name": "Метафорические карты",
+    "sphere": "Подсознание",
+    "coverImage": "https://images.unsplash.com/photo-1518531933037-91b2f5f229cc?w=400"
+  },
+  {
+    "id": 3,
+    "name": "Архетипы",
+    "sphere": "Самопознание",
+    "coverImage": "https://images.unsplash.com/photo-1564419320461-6870880221ad?w=400"
+  },
+  {
+    "id": 4,
+    "name": "Действия",
+    "sphere": "Реализация",
+    "coverImage": "https://images.unsplash.com/photo-1484480974693-6ca0a78fb36b?w=400"
+  }
+]
