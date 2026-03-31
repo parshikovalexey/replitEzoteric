@@ -197,4 +197,22 @@ export const gameDB = {
     const id = await db.add('notes', note as CardNote);
     return { ...note, id: id as number };
   },
+
+  async clearAllData(): Promise<void> {
+    const db = await getDB();
+    await db.clear('goals');
+    await db.clear('notes');
+    
+    // Reset sessions to initial state
+    const sessions = await db.getAll('sessions');
+    for (const session of sessions) {
+      const resetSession = {
+        ...session,
+        status: session.number === 1 ? 'available' : 'locked',
+        notes: '',
+        startTime: null
+      };
+      await db.put('sessions', resetSession);
+    }
+  },
 };

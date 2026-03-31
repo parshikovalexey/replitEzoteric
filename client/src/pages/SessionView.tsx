@@ -1,5 +1,5 @@
 import { useState, useEffect, useMemo } from "react";
-import { useRoute, useLocation } from "wouter";
+import { useRouteNavigator } from "@/routes";
 import { useSession, useDecks, useUpdateSession, useNotesBySession, useCardsByDeck, useSessions, useGoals } from "@/hooks/use-game";
 import { MobileLayout } from "@/components/MobileLayout";
 import { Button } from "@/components/ui/button";
@@ -8,30 +8,49 @@ import { Dialog, DialogContent, DialogDescription, DialogTitle } from "@/compone
 import { Clock, PlayCircle, Lock, ArrowLeft, CheckCircle2, X, ChevronRight } from "lucide-react";
 import { motion } from "framer-motion";
 
-export default function SessionView() {
-  const [, params] = useRoute("/session/:id");
-  const [, setLocation] = useLocation();
-  const sessionId = Number(params?.id);
+interface SessionViewProps {
+  sessionId: number | null;
+}
+
+export default function SessionView({ sessionId: initialSessionId }: SessionViewProps) {
+  const navigator = useRouteNavigator();
+  
+  // Use initialSessionId from props, or extract from hash if not provided
+  const sessionId = useMemo(() => {
+    if (initialSessionId !== null && initialSessionId !== undefined) {
+      return initialSessionId;
+    }
+    // Fallback: parse from hash
+    const hash = window.location.hash.slice(1);
+    const match = hash.match(/\/session\/(\d+)/);
+    return match ? Number(match[1]) : null;
+  }, [initialSessionId]);
   
   const { data: session, isLoading } = useSession(sessionId);
   const { data: sessions } = useSessions();
   const { data: goals, isLoading: goalsLoading } = useGoals();
   
-  // Check access
+  // Check access - only redirect if we're NOT getting params from hash
   useEffect(() => {
+    if (sessionId === null) {
+      // Try to get from hash directly
+      const hash = window.location.hash.slice(1);
+      const match = hash.match(/\/session\/(\d+)/);
+      if (!match) return; // Can't determine, skip
+    }
+    if (sessionId === null) return;
     if (!isLoading && !goalsLoading && sessions && goals) {
-      // Redirect to goal creation if no goal exists
       if (goals.length === 0) {
-        setLocation("/");
+        navigator.push('/');
         return;
       }
 
       const currentSession = sessions.find(s => s.id === sessionId);
       if (!currentSession || currentSession.status === 'locked') {
-        setLocation("/");
+        navigator.push('/');
       }
     }
-  }, [isLoading, goalsLoading, sessions, goals, sessionId, setLocation]);
+  }, [isLoading, goalsLoading, sessions, goals, sessionId]);
 
   const { data: allDecks } = useDecks();
   const { data: notes } = useNotesBySession(sessionId);
@@ -141,8 +160,8 @@ export default function SessionView() {
 
   const finishSession = () => {
     if (!isReadyToFinish) return;
-    updateSession.mutate({ id: sessionId, status: 'completed', notes: notesText }, {
-      onSuccess: () => setLocation("/training")
+    updateSession.mutate({ id: sessionId!, status: 'completed', notes: notesText }, {
+      onSuccess: () => navigator.push('/training')
     });
   };
 
@@ -150,7 +169,7 @@ export default function SessionView() {
     <MobileLayout 
       title={session.name}
       action={
-        <Button variant="ghost" size="icon" onClick={() => setLocation("/training")}>
+        <Button variant="ghost" size="icon" onClick={() => navigator.push('/training')}>
           <ArrowLeft className="w-5 h-5" />
         </Button>
       }
@@ -198,7 +217,7 @@ export default function SessionView() {
                 sessionId={sessionId}
                 canAccess={canAccessCards}
                 isCompleted={session.status === 'completed'}
-                onClick={() => setLocation(`/session/${sessionId}/deck/${deck.id}`)}
+                onClick={() => navigator.push(`/session/${sessionId}/deck/${deck.id}`)}
               />
             ))}
           </div>

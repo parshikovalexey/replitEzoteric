@@ -1,4 +1,4 @@
-import { useLocation } from "wouter";
+import { useRouteNavigator } from "@/routes";
 import { motion } from "framer-motion";
 import { useSessions, useGoals } from "@/hooks/use-game";
 import { MobileLayout } from "@/components/MobileLayout";
@@ -9,7 +9,7 @@ import { useState, useEffect } from "react";
 import { CompletionModal } from "@/components/CompletionModal";
 
 export default function ScheduleView() {
-  const [, setLocation] = useLocation();
+  const navigator = useRouteNavigator();
   const { data: sessions, isLoading: sessionsLoading } = useSessions();
   const { data: goals, isLoading: goalsLoading } = useGoals();
   const [showCompletion, setShowCompletion] = useState(false);
@@ -17,9 +17,9 @@ export default function ScheduleView() {
   // Redirect to goal creation if no goal exists
   useEffect(() => {
     if (!goalsLoading && (!goals || goals.length === 0)) {
-      setLocation("/");
+      navigator.push('/');
     }
-  }, [goals, goalsLoading, setLocation]);
+  }, [goals, goalsLoading]);
 
   if (sessionsLoading || goalsLoading) {
     return (
@@ -85,7 +85,7 @@ export default function ScheduleView() {
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: index * 0.1 }}
                 onClick={() => {
-                  if (!isLocked) setLocation(`/session/${session.id}`);
+                  if (!isLocked) navigator.push(`/session/${session.id}`);
                 }}
                 className={`
                   p-5 rounded-2xl border transition-all duration-300 relative overflow-hidden

@@ -1,10 +1,10 @@
 import { Dialog, DialogContent, DialogTitle, DialogDescription } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Sparkles, Printer } from "lucide-react";
-import { useLocation } from "wouter";
+import { useRouteNavigator } from "@/routes";
 
 export function CompletionModal({ isOpen, onClose }: { isOpen: boolean; onClose: () => void }) {
-  const [, setLocation] = useLocation();
+  const navigator = useRouteNavigator();
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
@@ -27,7 +27,7 @@ export function CompletionModal({ isOpen, onClose }: { isOpen: boolean; onClose:
 
         <div className="flex flex-col gap-3 pt-4">
           <Button 
-            onClick={() => setLocation("/report")}
+            onClick={() => navigator.push('/report')}
             className="w-full py-6 text-lg bg-primary hover:bg-primary/90 text-primary-foreground shadow-lg"
           >
             <Printer className="w-5 h-5 mr-2" />

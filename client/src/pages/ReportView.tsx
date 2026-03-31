@@ -2,7 +2,7 @@ import { useRef, useState, useMemo, useEffect } from "react";
   import { useGoals, useSessions, useDecks, useAllCards, useAllNotes } from "@/hooks/use-game";
   import { Button } from "@/components/ui/button";
   import { ArrowLeft, Download, Printer } from "lucide-react";
-  import { useLocation } from "wouter";
+  import { useRouteNavigator } from "@/routes";
   import html2canvas from "html2canvas";
   import jsPDF from "jspdf";
   import { format } from "date-fns";
@@ -20,19 +20,19 @@ import { useRef, useState, useMemo, useEffect } from "react";
     );
   }
 
-  function CardTreeNode({ cardId, notes, allCards, allDecks, parentId, slotIndex, level = 0 }: { 
-    cardId: number, 
-    notes: any[], 
-    allCards: any[], 
+  function CardTreeNode({ cardId, notes, allCards, allDecks, parentId, slotIndex, level = 0 }: {
+    cardId: number,
+    notes: any[],
+    allCards: any[],
     allDecks: any[],
     parentId: number | null,
     slotIndex: number | null,
-    level?: number 
+    level?: number
   }) {
     const card = allCards.find(c => c.id === cardId);
     const deck = allDecks.find(d => d.id === card?.deckId);
     const note = notes.find(n => n.cardId === cardId && n.parentId === parentId && n.slotIndex === slotIndex);
-    
+
     if (!card) return null;
 
     // Find children of THIS specific card
@@ -49,17 +49,17 @@ import { useRef, useState, useMemo, useEffect } from "react";
             </div>
           </div>
         </div>
-        
+
         {children.map((childNote, idx) => (
-          <CardTreeNode 
-            key={`child-${childNote.id}-${idx}`} 
-            cardId={childNote.cardId} 
-            notes={notes} 
-            allCards={allCards} 
+          <CardTreeNode
+            key={`child-${childNote.id}-${idx}`}
+            cardId={childNote.cardId}
+            notes={notes}
+            allCards={allCards}
             allDecks={allDecks}
             parentId={cardId}
             slotIndex={childNote.slotIndex}
-            level={level + 1} 
+            level={level + 1}
           />
         ))}
       </div>
@@ -67,15 +67,16 @@ import { useRef, useState, useMemo, useEffect } from "react";
   }
 
   export default function ReportView() {
-    const [, setLocation] = useLocation();
+    const navigator = useRouteNavigator();
     const printRef = useRef<HTMLDivElement>(null);
-    
+    const [isExporting, setIsExporting] = useState(false);
+
     const { data: goals } = useGoals();
     const { data: sessions } = useSessions();
     const { data: allDecks } = useDecks();
     const { data: allCards } = useAllCards();
     const { data: allNotes } = useAllNotes();
-    
+
 
     const goal = goals?.[goals.length - 1];
 
@@ -85,12 +86,12 @@ import { useRef, useState, useMemo, useEffect } from "react";
       if (sessions && sessions.length > 0) {
         const isFinished = sessions.every(s => s.status === 'completed');
         if (!isFinished) {
-          setLocation("/");
+          navigator.push('/');
         }
       }
       */
-    }, [sessions, setLocation]);
-    
+    }, [sessions, navigator]);
+
     const handleExportPDF = async () => {
       if (!printRef.current) return;
       setIsExporting(true);
@@ -103,15 +104,15 @@ import { useRef, useState, useMemo, useEffect } from "react";
           windowWidth: element.scrollWidth,
           windowHeight: element.scrollHeight
         });
-        
+
         const imgData = canvas.toDataURL('image/png');
         const pdf = new jsPDF('p', 'mm', 'a4');
         const pdfWidth = pdf.internal.pageSize.getWidth();
         const pdfHeight = pdf.internal.pageSize.getHeight();
-        
+
         const imgProps = pdf.getImageProperties(imgData);
         const imgHeight = (imgProps.height * pdfWidth) / imgProps.width;
-        
+
         let heightLeft = imgHeight;
         let position = 0;
 
@@ -124,7 +125,7 @@ import { useRef, useState, useMemo, useEffect } from "react";
           pdf.addImage(imgData, 'PNG', 0, position, pdfWidth, imgHeight);
           heightLeft -= pdfHeight;
         }
-        
+
         pdf.save(`transform-report-${format(new Date(), 'dd-MM-yyyy')}.pdf`);
       } catch (err) {
         console.error(err);
@@ -138,7 +139,7 @@ import { useRef, useState, useMemo, useEffect } from "react";
     return (
       <div className="min-h-screen bg-background text-foreground">
         <header className="print:hidden sticky top-0 z-50 bg-background/80 backdrop-blur-md border-b p-4 flex items-center justify-between">
-          <Button variant="ghost" onClick={() => setLocation("/training")}>
+          <Button variant="ghost" onClick={() => navigator.push('/training')}>
             <ArrowLeft className="w-5 h-5 mr-2" /> Назад
           </Button>
           <div className="flex items-center gap-4">
@@ -153,7 +154,7 @@ import { useRef, useState, useMemo, useEffect } from "react";
 
         <div className="max-w-[210mm] mx-auto bg-white text-black p-10 md:p-20 shadow-2xl my-8 print:my-0 print:shadow-none print:p-0">
           <div id="report-content" ref={printRef} className="space-y-12 bg-white text-black font-sans">
-            
+
             <div className="text-center space-y-4 pb-8 border-b-2 border-black/10">
               <h1 className="font-display text-4xl font-bold text-[#2b005e]">Трансформационный Отчет</h1>
               <p className="text-gray-500">
@@ -169,7 +170,7 @@ import { useRef, useState, useMemo, useEffect } from "react";
               {sessions.map((session) => {
                 const sessionNotes = allNotes.filter(n => n.sessionId === session.id);
                 const rootNotes = sessionNotes.filter(n => n.parentId === null);
-                
+
                 return (
                   <div key={session.id} className="space-y-10 page-break-inside-avoid">
                     <div className="flex flex-col border-b-2 border-[#2b005e]/20 pb-2">
@@ -178,11 +179,11 @@ import { useRef, useState, useMemo, useEffect } from "react";
 
                     <div className="space-y-12">
                       {rootNotes.map((rootNote, idx) => (
-                        <CardTreeNode 
-                          key={`root-${rootNote.id}-${idx}`} 
-                          cardId={rootNote.cardId} 
-                          notes={sessionNotes} 
-                          allCards={allCards} 
+                        <CardTreeNode
+                          key={`root-${rootNote.id}-${idx}`}
+                          cardId={rootNote.cardId}
+                          notes={sessionNotes}
+                          allCards={allCards}
                           allDecks={allDecks}
                           parentId={null}
                           slotIndex={null}
@@ -209,4 +210,3 @@ import { useRef, useState, useMemo, useEffect } from "react";
       </div>
     );
   }
-  

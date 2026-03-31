@@ -1,13 +1,13 @@
 import { ReactNode } from "react";
 import { ThemeSwitcher } from "./ThemeSwitcher";
 import { useGoals } from "@/hooks/use-game";
-import { useLocation } from "wouter";
+import { useRouteNavigator } from "@/routes";
 import { FileText } from "lucide-react";
 import { Button } from "./ui/button";
 
 export function MobileLayout({ children, title, action }: { children: ReactNode; title?: string; action?: ReactNode }) {
   const { data: goals } = useGoals();
-  const [location, setLocation] = useLocation();
+  const navigator = useRouteNavigator();
   const currentGoal = goals?.[goals.length - 1];
 
   return (
@@ -25,7 +25,7 @@ export function MobileLayout({ children, title, action }: { children: ReactNode;
               <Button 
                 variant="ghost" 
                 size="icon" 
-                onClick={() => setLocation("/report")}
+                onClick={() => navigator.push('/report')}
                 className="text-primary/60 hover:text-primary hover:bg-white/5"
                 title="Отчет"
               >

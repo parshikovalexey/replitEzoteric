@@ -1,12 +1,12 @@
 import { useState, useMemo, useEffect } from "react";
-  import { useRoute, useLocation } from "wouter";
-  import { useDeck, useCardsByDeck, useNotesBySession, useSaveNote, useDecks, useSession, useGoals } from "@/hooks/use-game";
-  import { MobileLayout } from "@/components/MobileLayout";
-  import { Button } from "@/components/ui/button";
-  import { ArrowLeft, ChevronRight, Check, X } from "lucide-react";
-  import { motion, AnimatePresence } from "framer-motion";
-  import { Drawer, DrawerContent, DrawerHeader, DrawerTitle, DrawerDescription } from "@/components/ui/drawer";
-  import { Textarea } from "@/components/ui/textarea";
+import { useRouteNavigator, useActiveVkuiLocation } from "@/routes";
+import { useDeck, useCardsByDeck, useNotesBySession, useSaveNote, useDecks, useSession, useGoals } from "@/hooks/use-game";
+import { MobileLayout } from "@/components/MobileLayout";
+import { Button } from "@/components/ui/button";
+import { ArrowLeft, ChevronRight, Check, X } from "lucide-react";
+import { motion, AnimatePresence } from "framer-motion";
+import { Drawer, DrawerContent, DrawerHeader, DrawerTitle, DrawerDescription } from "@/components/ui/drawer";
+import { Textarea } from "@/components/ui/textarea";
 
   function CardFace({ card, isChosen }: { card: any, isChosen?: boolean }) {
     return (
@@ -20,13 +20,13 @@ import { useState, useMemo, useEffect } from "react";
     );
   }
 
-  
+
   function NestedDeckItem({ deckId, parentCardId, sessionId, slotIndex, onClick }: any) {
     const { data: allDecks } = useDecks();
     const { data: notes } = useNotesBySession(sessionId);
     const { data: deckCards } = useCardsByDeck(deckId);
     const deck = allDecks?.find(d => d.id === deckId);
-    
+
     const chosenCard = useMemo(() => {
       if (!notes || !deckCards) return null;
       const cardIds = deckCards.map(c => c.id);
@@ -36,8 +36,8 @@ import { useState, useMemo, useEffect } from "react";
     }, [notes, deckCards, parentCardId]);
 
     return (
-      <Button 
-        variant="outline" 
+      <Button
+        variant="outline"
         className={`shrink-0 h-24 w-16 p-0 border-primary/50 bg-card hover:bg-primary/20 relative overflow-hidden ${chosenCard ? 'border-primary/50' : ''}`}
         onClick={onClick}
       >
@@ -60,17 +60,16 @@ import { useState, useMemo, useEffect } from "react";
   }
 
 
-  
-  
-  function CardNoteDetail({ 
-    card, sessionId, parentId = null, slotIndex = null, onClose 
-  }: { 
-    card: any, sessionId: number, parentId?: number | null, slotIndex?: number | null, onClose: () => void 
+
+
+  function CardNoteDetail({
+    card, sessionId, parentId = null, slotIndex = null, onClose, navigator
+  }: {
+    card: any, sessionId: number, parentId?: number | null, slotIndex?: number | null, onClose: () => void, navigator?: any
   }) {
-    const [, setLocation] = useLocation();
     const { data: notes } = useNotesBySession(sessionId);
     const saveNote = useSaveNote();
-    
+
     const existingNote = notes?.find(n => n.cardId === card.id && n.parentId === parentId && n.slotIndex === (slotIndex ?? null));
     const [content, setContent] = useState(existingNote?.content || "");
     const [activeSlot, setActiveSlot] = useState<{deckId: number, index: number} | null>(null);
@@ -103,16 +102,19 @@ import { useState, useMemo, useEffect } from "react";
     }, [notes, card.id]);
 
     const handleSave = () => {
+      console.log('[CardSelector] handleSave called, sessionId:', sessionId, 'parentId:', parentId);
       // Immediate close if no changes, otherwise save and close
       if (content === (existingNote?.content || "")) {
-        if (parentId === null) setLocation(`/session/${sessionId}`);
+        console.log('[CardSelector] No changes, navigating to /session/', sessionId);
+        if (parentId === null) navigator.push(`/session/${sessionId}`);
         else onClose();
         return;
       }
 
       saveNote.mutate({ sessionId, cardId: card.id, content, parentId, slotIndex }, {
         onSuccess: () => {
-          if (parentId === null) setLocation(`/session/${sessionId}`);
+          console.log('[CardSelector] Note saved, navigating to /session/', sessionId);
+          if (parentId === null) navigator.push(`/session/${sessionId}`);
           else onClose();
         }
       });
@@ -120,12 +122,12 @@ import { useState, useMemo, useEffect } from "react";
 
     if (activeSlot) {
       return (
-        <NestedDeckNav 
-          deckId={activeSlot.deckId} 
-          sessionId={sessionId} 
-          parentCardId={card.id} 
+        <NestedDeckNav
+          deckId={activeSlot.deckId}
+          sessionId={sessionId}
+          parentCardId={card.id}
           slotIndex={activeSlot.index}
-          onBack={() => setActiveSlot(null)} 
+          onBack={() => setActiveSlot(null)}
         />
       );
     }
@@ -157,9 +159,9 @@ import { useState, useMemo, useEffect } from "react";
              <div className={`text-sm text-foreground/90 whitespace-pre-wrap leading-relaxed ${!isExpanded ? 'line-clamp-4' : ''}`}>
                {aggregatedChildNotes}
              </div>
-             <Button 
-               variant="ghost" 
-               size="icon" 
+             <Button
+               variant="ghost"
+               size="icon"
                className="absolute bottom-1 right-1 h-6 w-6 text-primary hover:bg-primary/20"
                onClick={() => setIsExpanded(!isExpanded)}
              >
@@ -173,7 +175,7 @@ import { useState, useMemo, useEffect } from "react";
             <p className="text-sm font-semibold text-primary">Требуются дополнительные карты:</p>
             <div className="flex gap-2 overflow-x-auto pb-2 no-scrollbar">
               {card.requiredDecks.map((reqDeckId: number, idx: number) => (
-                <NestedDeckItem 
+                <NestedDeckItem
                   key={`req-${reqDeckId}-${idx}`}
                   deckId={reqDeckId}
                   parentCardId={card.id}
@@ -187,7 +189,7 @@ import { useState, useMemo, useEffect } from "react";
         )}
         <div className="flex-1 flex flex-col gap-2 pt-2 border-t border-white/10">
           <label className="text-sm font-semibold text-foreground">Заметка по карте</label>
-          <Textarea 
+          <Textarea
             value={content}
             onChange={(e) => setContent(e.target.value)}
             className="flex-1 min-h-[100px] resize-none bg-background/50 border-white/10 focus-visible:ring-primary/50 custom-scrollbar"
@@ -200,11 +202,11 @@ import { useState, useMemo, useEffect } from "react";
       </div>
     );
   }
-  
-function NestedDeckNav({ 
-    deckId, sessionId, parentCardId, slotIndex, onBack 
-  }: { 
-    deckId: number, sessionId: number, parentCardId: number, slotIndex?: number, onBack: () => void 
+
+function NestedDeckNav({
+    deckId, sessionId, parentCardId, slotIndex, onBack
+  }: {
+    deckId: number, sessionId: number, parentCardId: number, slotIndex?: number, onBack: () => void
   }) {
     const { data: cards } = useCardsByDeck(deckId);
     const { data: deck } = useDeck(deckId);
@@ -237,12 +239,13 @@ function NestedDeckNav({
 
     if (cardToShow) {
       return (
-        <CardNoteDetail 
-          card={cardToShow} 
-          sessionId={sessionId} 
+        <CardNoteDetail
+          card={cardToShow}
+          sessionId={sessionId}
           parentId={parentCardId}
           slotIndex={slotIndex}
-          onClose={selectedCard ? () => setSelectedCard(null) : onBack} 
+          onClose={selectedCard ? () => setSelectedCard(null) : onBack}
+          navigator={navigator}
         />
       );
     }
@@ -255,7 +258,7 @@ function NestedDeckNav({
         </div>
         <div className="flex-1 overflow-y-auto grid grid-cols-3 gap-3 p-1 custom-scrollbar">
           {cards.map((card) => (
-            <div 
+            <div
               key={card.id}
               onClick={() => handleNestedCardClick(card)}
               className="aspect-[2/3] rounded-lg border border-primary/30 cursor-pointer shadow-md transition-all hover:border-primary/60 hover:scale-105"
@@ -266,12 +269,25 @@ function NestedDeckNav({
       </div>
     );
   }
-  
-export default function CardSelector() {
-    const [, params] = useRoute("/session/:sessionId/deck/:deckId");
-    const [, setLocation] = useLocation();
-    const sessionId = Number(params?.sessionId);
-    const deckId = Number(params?.deckId);
+
+export default function CardSelector({ sessionId: initialSessionId, deckId: initialDeckId }: { sessionId?: number | null; deckId?: number | null }) {
+    const navigator = useRouteNavigator();
+    console.log('[CardSelector] navigator:', navigator);
+
+    // Use props or parse from hash
+    const sessionId = useMemo(() => {
+      if (initialSessionId != null) return initialSessionId;
+      const hash = window.location.hash.slice(1);
+      const match = hash.match(/\/session\/(\d+)/);
+      return match ? Number(match[1]) : null;
+    }, [initialSessionId]);
+
+    const deckId = useMemo(() => {
+      if (initialDeckId != null) return initialDeckId;
+      const hash = window.location.hash.slice(1);
+      const match = hash.match(/\/session\/\d+\/deck\/(\d+)/);
+      return match ? Number(match[1]) : null;
+    }, [initialDeckId]);
 
     const { data: deck, isLoading: deckLoading } = useDeck(deckId);
     const { data: cards, isLoading: cardsLoading } = useCardsByDeck(deckId);
@@ -294,21 +310,21 @@ export default function CardSelector() {
     const handleClose = () => {
       setActiveCard(null);
       if (chosenRootCardId) {
-        setLocation(`/session/${sessionId}`);
+        navigator.push(`/session/${sessionId}`);
       }
     };
 
     useEffect(() => {
       if (!deckLoading && !sessionLoading && !goalsLoading && goals) {
-        if (goals.length === 0) { setLocation("/"); return; }
-        if (!session || session.status === 'locked') { setLocation("/"); return; }
+        if (goals.length === 0) { navigator.push('/'); return; }
+        if (!session || session.status === 'locked') { navigator.push('/'); return; }
         if (session.status !== 'in_progress' && session.status !== 'completed') {
-          setLocation(`/session/${sessionId}`);
+          navigator.push(`/session/${sessionId}`);
           return;
         }
-        if (!deck || !session.deckIds.includes(deckId)) { setLocation("/"); return; }
+        if (!deck || !session.deckIds.includes(deckId!)) { navigator.push('/'); return; }
       }
-    }, [deck, deckLoading, session, sessionLoading, goals, goalsLoading, sessionId, deckId, setLocation]);
+    }, [deck, deckLoading, session, sessionLoading, goals, goalsLoading, sessionId, deckId]);
 
     useEffect(() => {
       if (!deckLoading && !cardsLoading && !notesLoading && chosenRootCardId && !activeCard && !isChoosingId) {
@@ -335,13 +351,13 @@ export default function CardSelector() {
 
     if (chosenRootCardId !== null && activeCard) {
       return (
-        <MobileLayout 
+        <MobileLayout
           title={deck.name}
-          action={<Button variant="ghost" size="icon" onClick={() => setLocation(`/session/${sessionId}`)}><ArrowLeft className="w-5 h-5" /></Button>}
+          action={<Button variant="ghost" size="icon" onClick={() => navigator.push(`/session/${sessionId}`)}><ArrowLeft className="w-5 h-5" /></Button>}
         >
           <div className="flex flex-col items-center justify-center p-4 min-h-[60vh]">
             <div className="w-full max-w-md glass-panel p-6 rounded-3xl">
-               <CardNoteDetail card={activeCard} sessionId={sessionId} onClose={handleClose} />
+               <CardNoteDetail card={activeCard} sessionId={sessionId} onClose={handleClose} navigator={navigator} />
             </div>
           </div>
         </MobileLayout>
@@ -351,9 +367,9 @@ export default function CardSelector() {
     const shuffledCards = [...(cards || [])].sort(() => 0.5 - Math.random());
 
     return (
-      <MobileLayout 
+      <MobileLayout
         title={deck.name}
-        action={<Button variant="ghost" size="icon" onClick={() => setLocation(`/session/${sessionId}`)}><ArrowLeft className="w-5 h-5" /></Button>}
+        action={<Button variant="ghost" size="icon" onClick={() => navigator.push(`/session/${sessionId}`)}><ArrowLeft className="w-5 h-5" /></Button>}
       >
         <div className="grid grid-cols-2 sm:grid-cols-3 gap-4 auto-rows-max perspective-1000 p-2">
           <AnimatePresence>

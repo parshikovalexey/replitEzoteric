@@ -1,10 +1,10 @@
-import { Switch, Route } from "wouter";
-import { queryClient } from "./lib/queryClient";
+import { RouterProvider } from '@vkontakte/vk-mini-apps-router';
 import { QueryClientProvider } from "@tanstack/react-query";
+import { queryClient } from "./lib/queryClient";
 import { Toaster } from "@/components/ui/toaster";
 import { TooltipProvider } from "@/components/ui/tooltip";
+import { router, hierarchy, useActiveVkuiLocation, usePanelParams } from "./routes";
 import { useVKBridge } from "./hooks/useVKBridge";
-
 import GamePreparation from "./pages/GamePreparation";
 import ScheduleView from "./pages/ScheduleView";
 import SessionView from "./pages/SessionView";
@@ -12,17 +12,33 @@ import CardSelector from "./pages/CardSelector";
 import ReportView from "./pages/ReportView";
 import NotFound from "@/pages/not-found";
 
-function Router() {
-  return (
-    <Switch>
-      <Route path="/" component={GamePreparation} />
-      <Route path="/training" component={ScheduleView} />
-      <Route path="/session/:id" component={SessionView} />
-      <Route path="/session/:sessionId/deck/:deckId" component={CardSelector} />
-      <Route path="/report" component={ReportView} />
-      <Route component={NotFound} />
-    </Switch>
-  );
+function AppContent() {
+  const { panel } = useActiveVkuiLocation() || {};
+  const { sessionId, deckId } = usePanelParams();
+
+  console.log('[AppContent] panel:', panel, 'sessionId:', sessionId, 'deckId:', deckId);
+
+  if (panel === 'home_panel') {
+    return <GamePreparation />;
+  }
+
+  if (panel === 'training_panel') {
+    return <ScheduleView />;
+  }
+
+  if (panel === 'session_panel') {
+    return <SessionView sessionId={sessionId} />;
+  }
+
+  if (panel === 'card_selector_panel') {
+    return <CardSelector sessionId={sessionId} deckId={deckId} />;
+  }
+
+  if (panel === 'report_panel') {
+    return <ReportView />;
+  }
+
+  return <NotFound />;
 }
 
 function App() {
@@ -47,15 +63,16 @@ function App() {
     );
   }
 
-  // Для отладки показываем информацию о пользователе в консоли
   console.log('Приложение запущено, пользователь:', user);
   console.log('Режим:', isMock ? 'mock' : 'реальный VK');
 
   return (
     <QueryClientProvider client={queryClient}>
       <TooltipProvider>
+        <RouterProvider router={router} hierarchy={hierarchy}>
+          <AppContent />
+        </RouterProvider>
         <Toaster />
-        <Router />
       </TooltipProvider>
     </QueryClientProvider>
   );

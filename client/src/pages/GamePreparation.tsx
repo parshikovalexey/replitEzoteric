@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
-import { useLocation } from "wouter";
+import { useRouteNavigator } from "@/routes";
 import { motion, AnimatePresence } from "framer-motion";
-import { useCreateGoal, useGoals } from "@/hooks/use-game";
+import { useCreateGoal, useGoals, useClearAllData } from "@/hooks/use-game";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { MobileLayout } from "@/components/MobileLayout";
@@ -15,8 +15,9 @@ const QUESTIONS = [
 ];
 
 export default function GamePreparation() {
-  const [location, setLocation] = useLocation();
+  const navigator = useRouteNavigator();
   const createGoal = useCreateGoal();
+  const clearAllData = useClearAllData();
   const { data: goals } = useGoals();
   
   const [step, setStep] = useState<"input" | "dice" | "warning">("input");
@@ -39,13 +40,13 @@ export default function GamePreparation() {
   useEffect(() => {
     if (createGoal.isSuccess && step === "dice") {
       console.log('Goal created successfully, navigating to /training');
-      setLocation("/training");
+      navigator.push('/training');
     }
     if (createGoal.isError) {
       console.error('Goal creation error:', createGoal.error);
       setIsProcessing(false);
     }
-  }, [createGoal.isSuccess, createGoal.isError]);
+  }, [createGoal.isSuccess, createGoal.isError, navigator, step]);
 
   const handleAmountSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -102,7 +103,7 @@ export default function GamePreparation() {
     }, 800);
   };
 
-  const resetGame = () => {
+  const resetForm = () => {
     setStep("input");
     setAmount("");
     setRejected(false);
@@ -132,7 +133,7 @@ export default function GamePreparation() {
               </div>
               <div className="space-y-3">
                 <Button 
-                  onClick={() => setLocation("/training")}
+                  onClick={() => navigator.push('/training')}
                   className="w-full py-6 text-lg font-bold bg-primary text-primary-foreground rounded-xl"
                 >
                   Продолжить
@@ -140,9 +141,11 @@ export default function GamePreparation() {
                 <Button 
                   variant="outline"
                   onClick={() => {
-                    createGoal.mutate({ amount: "", question: "", status: "rejected" }); // Clear on server if needed, or just set rejected
-                    setAmount("");
-                    setStep("input");
+                    clearAllData.mutate(undefined, {
+                      onSuccess: () => {
+                        resetForm();
+                      }
+                    });
                   }}
                   className="w-full py-6 text-lg border-primary/30 text-primary"
                 >
@@ -299,7 +302,7 @@ export default function GamePreparation() {
               </Alert>
 
               <Button 
-                onClick={resetGame}
+                onClick={resetForm}
                 variant="outline"
                 className="w-full py-6 text-lg border-primary/50 text-primary hover:bg-primary/20"
               >

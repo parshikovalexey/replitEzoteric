@@ -40,6 +40,25 @@ export function useCreateGoal() {
   });
 }
 
+export function useClearAllData() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: async () => {
+      if (USE_LOCAL_DB) {
+        return gameDB.clearAllData();
+      }
+      const res = await fetch('/api/reset', { method: 'POST' });
+      if (!res.ok) throw new Error("Failed to reset game");
+      return res.json();
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['goals'] });
+      queryClient.invalidateQueries({ queryKey: ['sessions'] });
+      queryClient.invalidateQueries({ queryKey: ['notes'] });
+    },
+  });
+}
+
 // Sessions
 export function useSessions() {
   return useQuery({
