@@ -7,21 +7,7 @@ import { ArrowLeft, ChevronRight, Check, X } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Drawer, DrawerContent, DrawerHeader, DrawerTitle, DrawerDescription } from "@/components/ui/drawer";
 import { Textarea } from "@/components/ui/textarea";
-
-  function CardFace({ card, isChosen }: { card: any, isChosen?: boolean }) {
-    const isPortrait = card.orientation === 'portrait';
-    return (
-      <div className={`w-full relative bg-card border-2 shadow-xl rounded-xl overflow-hidden ${isChosen ? 'border-primary shadow-[0_0_15px_var(--primary)]' : 'border-primary/50'}`}>
-        <div className={`w-full h-full`}>
-          <img
-            src={card.image}
-            alt={card.name}
-            className={`w-full h-full object-contain ${isPortrait ? '' : 'object-top'}`}
-          />
-        </div>
-      </div>
-    );
-  }
+import { CardFace } from "@/components/CardFace";
 
   function NestedDeckItem({ deckId, parentCardId, sessionId, slotIndex, onClick }: any) {
     const { data: allDecks } = useDecks();

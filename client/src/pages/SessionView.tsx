@@ -1,12 +1,13 @@
 import { useState, useEffect, useMemo } from "react";
 import { useRouteNavigator } from "@/routes";
-import { useSession, useDecks, useUpdateSession, useNotesBySession, useCardsByDeck, useSessions, useGoals } from "@/hooks/use-game";
+import { useSession, useDecks, useUpdateSession, useNotesBySession, useCardsByDeck, useSessions, useGoals, useAllCards } from "@/hooks/use-game";
 import { MobileLayout } from "@/components/MobileLayout";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { Dialog, DialogContent, DialogDescription, DialogTitle } from "@/components/ui/dialog";
 import { Clock, PlayCircle, Lock, ArrowLeft, CheckCircle2, X, ChevronRight } from "lucide-react";
 import { motion } from "framer-motion";
+import { CardFace } from "@/components/CardFace";
 
 interface SessionViewProps {
   sessionId: number | null;
@@ -54,6 +55,7 @@ export default function SessionView({ sessionId: initialSessionId }: SessionView
 
   const { data: allDecks } = useDecks();
   const { data: notes } = useNotesBySession(sessionId);
+  const { data: allCards } = useAllCards();
   const updateSession = useUpdateSession();
 
   const [isExpanded, setIsExpanded] = useState(false);
@@ -154,6 +156,14 @@ export default function SessionView({ sessionId: initialSessionId }: SessionView
 
   const sessionDecks = allDecks?.filter(d => session.deckIds.includes(d.id)) || [];
 
+  const hasLandscapeCard = useMemo(() => {
+    if (!notes || !allCards) return false;
+    const deckIds = session.deckIds;
+    const deckCards = allCards.filter(c => deckIds.includes(c.deckId));
+    const chosenCardIds = notes.filter(n => n.parentId === null).map(n => n.cardId);
+    return deckCards.some(c => chosenCardIds.includes(c.id) && c.orientation === 'landscape');
+  }, [notes, allCards, session.deckIds]);
+
   // Logic to determine if all cards are chosen
   const rootNotesCount = notes?.filter(n => n.parentId === null).length || 0;
   const isReadyToFinish = rootNotesCount >= session.deckIds.length;
@@ -209,7 +219,7 @@ export default function SessionView({ sessionId: initialSessionId }: SessionView
         {/* Decks Grid */}
         <div className="space-y-4">
           <h3 className="font-display text-xl text-foreground ml-2">Колоды</h3>
-          <div className="grid grid-cols-2 gap-4">
+          <div className={`grid ${hasLandscapeCard ? 'grid-cols-1' : 'grid-cols-2'} gap-4`}>
             {sessionDecks.map((deck) => (
               <SessionDeckCard
                 key={deck.id}
@@ -217,6 +227,7 @@ export default function SessionView({ sessionId: initialSessionId }: SessionView
                 sessionId={sessionId}
                 canAccess={canAccessCards}
                 isCompleted={session.status === 'completed'}
+                isLandscapeMode={hasLandscapeCard}
                 onClick={() => navigator.push(`/session/${sessionId}/deck/${deck.id}`)}
               />
             ))}
@@ -294,22 +305,7 @@ export default function SessionView({ sessionId: initialSessionId }: SessionView
   );
 }
 
-function CardFace({ card, isChosen }: { card: any, isChosen?: boolean }) {
-  const isPortrait = card.orientation === 'portrait';
-  return (
-    <div className={`${isPortrait ? 'w-full aspect-[2/3]' : 'w-72 aspect-[3/2]'} relative bg-card border-2 shadow-xl rounded-xl overflow-hidden ${isChosen ? 'border-primary shadow-[0_0_15px_var(--primary)]' : 'border-primary/50'}`}>
-      <div className={`w-full h-full`}>
-        <img
-          src={card.image}
-          alt={card.name}
-          className={`w-full h-full object-contain ${isPortrait ? '' : 'object-top'}`}
-        />
-      </div>
-    </div>
-  );
-}
-
-function SessionDeckCard({ deck, sessionId, canAccess, isCompleted, onClick, onCardChosen }: any) {
+function SessionDeckCard({ deck, sessionId, canAccess, isCompleted, isLandscapeMode, onClick, onCardChosen }: any) {
   const { data: cards } = useCardsByDeck(deck.id);
   const { data: notes } = useNotesBySession(sessionId);
 
@@ -321,41 +317,38 @@ function SessionDeckCard({ deck, sessionId, canAccess, isCompleted, onClick, onC
     return cards.find(c => c.id === note.cardId);
   }, [cards, notes]);
 
+  const aspectClass = isLandscapeMode ? 'aspect-[3/2]' : 'aspect-[2/3]';
+
   return (
     <motion.div
       whileHover={canAccess ? { scale: 1.05 } : {}}
       whileTap={canAccess ? { scale: 0.95 } : {}}
-      onClick={() => {
-        if (canAccess) onClick();
-      }}
+      onClick={() => canAccess && onClick()}
       className={`
-        aspect-[3/4] rounded-xl border relative overflow-hidden flex flex-col justify-end p-4 transition-all
-        ${canAccess ? 'cursor-pointer border-primary/50 shadow-[0_0_15px_rgba(var(--primary),0.1)]' : 'cursor-not-allowed border-white/5 opacity-50 grayscale'}
+        ${aspectClass} rounded-xl border-primary/50 overflow-hidden relative
+        ${!canAccess ? 'opacity-50 grayscale cursor-not-allowed' : 'cursor-pointer'}
         ${chosenCard ? 'border-primary shadow-[0_0_20px_var(--primary)]' : ''}
       `}
       style={{
-        backgroundImage: `url(${deck.coverImage})`,
+        backgroundImage: chosenCard ? 'none' : `url(${deck.coverImage})`,
         backgroundSize: 'cover',
         backgroundPosition: 'center'
       }}
     >
       {chosenCard ? (
-        <div className="absolute inset-0 z-10">
-          <CardFace card={chosenCard} isChosen={true} />
-        </div>
+        <CardFace card={chosenCard} isChosen={true} />
       ) : (
         <>
-          <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/40 to-transparent" />
-          <div className="relative z-10 text-center">
-            <h4 className="font-bold text-white leading-tight">{deck.name}</h4>
-            <p className="text-xs text-white/70 mt-1">{deck.sphere}</p>
+          <div className="absolute inset-0 bg-gradient-to-t from-black/70 to-transparent" />
+          <div className="absolute bottom-0 left-0 right-0 p-3 text-center">
+            <h4 className="font-bold text-white text-sm leading-tight">{deck.name}</h4>
+            <p className="text-xs text-white/70">{deck.sphere}</p>
           </div>
         </>
       )}
-
       {!canAccess && !isCompleted && (
-        <div className="absolute inset-0 flex items-center justify-center bg-black/60 backdrop-blur-[2px] z-20">
-          <Lock className="w-8 h-8 text-white/50" />
+        <div className="absolute inset-0 flex items-center justify-center bg-black/50">
+          <Lock className="w-6 h-6 text-white/50" />
         </div>
       )}
     </motion.div>
