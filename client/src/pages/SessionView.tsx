@@ -14,7 +14,7 @@ interface SessionViewProps {
 
 export default function SessionView({ sessionId: initialSessionId }: SessionViewProps) {
   const navigator = useRouteNavigator();
-  
+
   // Use initialSessionId from props, or extract from hash if not provided
   const sessionId = useMemo(() => {
     if (initialSessionId !== null && initialSessionId !== undefined) {
@@ -25,11 +25,11 @@ export default function SessionView({ sessionId: initialSessionId }: SessionView
     const match = hash.match(/\/session\/(\d+)/);
     return match ? Number(match[1]) : null;
   }, [initialSessionId]);
-  
+
   const { data: session, isLoading } = useSession(sessionId);
   const { data: sessions } = useSessions();
   const { data: goals, isLoading: goalsLoading } = useGoals();
-  
+
   // Check access - only redirect if we're NOT getting params from hash
   useEffect(() => {
     if (sessionId === null) {
@@ -75,7 +75,7 @@ export default function SessionView({ sessionId: initialSessionId }: SessionView
       // In session view, we aggregate notes from ALL root cards
       const rootNotes = notes.filter(n => n.parentId === null);
       let allNestedNotes: string[] = [];
-      
+
       for (const root of rootNotes) {
         // Add root note content itself if we want, but the user said "from nested cards"
         // However, usually we want to see everything that isn't the session note itself.
@@ -88,7 +88,7 @@ export default function SessionView({ sessionId: initialSessionId }: SessionView
       }
       return allNestedNotes.join('\n\n');
     }, [notes]);
-  
+
 
   const [showWarning, setShowWarning] = useState(false);
   const [timerStarted, setTimerStarted] = useState(false);
@@ -127,7 +127,7 @@ export default function SessionView({ sessionId: initialSessionId }: SessionView
     return () => clearInterval(interval);
   }, [timerStarted, timeLeft, session?.status, sessionId, updateSession]);
 
-  
+
 
   if (isLoading || !session) return <MobileLayout><div className="animate-pulse flex justify-center mt-20">Загрузка...</div></MobileLayout>;
 
@@ -142,8 +142,8 @@ export default function SessionView({ sessionId: initialSessionId }: SessionView
     setTimerStarted(true);
     const totalSeconds = (session.timerMinutes || 30) * 60;
     setTimeLeft(totalSeconds);
-    updateSession.mutate({ 
-      id: sessionId, 
+    updateSession.mutate({
+      id: sessionId,
       status: 'in_progress',
       startTime: new Date().toISOString()
     });
@@ -166,7 +166,7 @@ export default function SessionView({ sessionId: initialSessionId }: SessionView
   };
 
   return (
-    <MobileLayout 
+    <MobileLayout
       title={session.name}
       action={
         <Button variant="ghost" size="icon" onClick={() => navigator.push('/training')}>
@@ -178,7 +178,7 @@ export default function SessionView({ sessionId: initialSessionId }: SessionView
         {/* Header & Timer */}
         <div className="glass-panel p-6 rounded-3xl flex flex-col items-center text-center space-y-4">
           <h2 className="font-display text-2xl font-bold text-primary">{session.name}</h2>
-          
+
           {session.status !== 'completed' && (
               <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-background/50 border border-primary/30 text-xl font-mono text-primary">
                 <Clock className="w-5 h-5" />
@@ -188,7 +188,7 @@ export default function SessionView({ sessionId: initialSessionId }: SessionView
 
           <div className="flex flex-col w-full gap-2">
             {!timerStarted && (
-              <Button 
+              <Button
                 onClick={() => setShowWarning(true)}
                 className="w-full py-6 text-lg bg-primary hover:bg-primary/90 text-primary-foreground shadow-lg shadow-primary/25"
               >
@@ -196,8 +196,8 @@ export default function SessionView({ sessionId: initialSessionId }: SessionView
                 Начать Сессию
               </Button>
             )}
-            
-            
+
+
           </div>
           {isExpired && (
             <div className="text-destructive font-bold text-sm bg-destructive/10 px-4 py-2 rounded-lg">
@@ -211,7 +211,7 @@ export default function SessionView({ sessionId: initialSessionId }: SessionView
           <h3 className="font-display text-xl text-foreground ml-2">Колоды</h3>
           <div className="grid grid-cols-2 gap-4">
             {sessionDecks.map((deck) => (
-              <SessionDeckCard 
+              <SessionDeckCard
                 key={deck.id}
                 deck={deck}
                 sessionId={sessionId}
@@ -223,20 +223,20 @@ export default function SessionView({ sessionId: initialSessionId }: SessionView
           </div>
         </div>
 
-        
+
           {/* Session Notes */}
           <div className="space-y-3 pt-4">
             <h3 className="font-display text-xl text-foreground ml-2">Заметки по сессии</h3>
-            
+
             {aggregatedAllNotes && (
               <div className="relative p-3 bg-primary/5 border border-primary/20 rounded-lg overflow-hidden transition-all duration-300">
                  <h4 className="text-[10px] font-bold text-primary uppercase tracking-wider mb-1">Заметки из карт</h4>
                  <div className={`text-sm text-foreground/90 whitespace-pre-wrap leading-relaxed ${!isExpanded ? 'line-clamp-4' : ''}`}>
                    {aggregatedAllNotes}
                  </div>
-                 <Button 
-                   variant="ghost" 
-                   size="icon" 
+                 <Button
+                   variant="ghost"
+                   size="icon"
                    className="absolute bottom-1 right-1 h-6 w-6 text-primary hover:bg-primary/20"
                    onClick={() => setIsExpanded(!isExpanded)}
                  >
@@ -245,15 +245,15 @@ export default function SessionView({ sessionId: initialSessionId }: SessionView
               </div>
             )}
 
-            <Textarea 
+            <Textarea
               value={notesText}
               onChange={(e) => setNotes(e.target.value)}
               placeholder="Ваши инсайты, выводы и мысли по итогу сессии..."
               className="min-h-[200px] glass-panel border-primary/20 bg-background/50 text-base resize-none focus-visible:ring-primary/30 custom-scrollbar"
             />
-            
+
               {isReadyToFinish && notesText.length >= 3 ? (
-                <Button 
+                <Button
                   onClick={finishSession}
                   className="w-full bg-primary text-primary-foreground hover:bg-primary/90 mt-4"
                   data-testid="button-finish-session"
@@ -261,7 +261,7 @@ export default function SessionView({ sessionId: initialSessionId }: SessionView
                   Сохранить и завершить сессию
                 </Button>
               ) : !isReadyToFinish && notesText.length >= 2 ? (
-                <Button 
+                <Button
                   onClick={() => updateSession.mutate({ id: sessionId, notes: notesText })}
                   className="w-full bg-primary text-primary-foreground hover:bg-primary/90 mt-4"
                   data-testid="button-save-session-note"
@@ -269,7 +269,7 @@ export default function SessionView({ sessionId: initialSessionId }: SessionView
                   Сохранить
                 </Button>
               ) : null}
-          
+
         </div>
       </div>
 
@@ -295,13 +295,16 @@ export default function SessionView({ sessionId: initialSessionId }: SessionView
 }
 
 function CardFace({ card, isChosen }: { card: any, isChosen?: boolean }) {
+  const isPortrait = card.orientation === 'portrait';
   return (
-    <div className={`w-full h-full relative bg-card border-2 shadow-xl rounded-xl p-4 flex flex-col justify-center items-center text-center overflow-hidden ${isChosen ? 'border-primary shadow-[0_0_15px_var(--primary)]' : 'border-primary/50'}`}>
-      <div className="absolute inset-0 bg-gradient-to-b from-primary/10 to-transparent pointer-events-none" />
-      <span className="text-[10px] font-bold text-primary mb-2 uppercase tracking-wider">{card.actionType}</span>
-      <h5 className="font-display font-bold text-2xl leading-tight text-foreground">#{card.id}</h5>
-      <p className="font-display font-medium text-xs mt-2 text-foreground/80">{card.name}</p>
-      {isChosen && <div className="mt-2 bg-primary/20 px-2 py-0.5 rounded text-[10px] text-primary font-bold tracking-widest">ВЫБРАНО</div>}
+    <div className={`${isPortrait ? 'w-full aspect-[2/3]' : 'w-72 aspect-[3/2]'} relative bg-card border-2 shadow-xl rounded-xl overflow-hidden ${isChosen ? 'border-primary shadow-[0_0_15px_var(--primary)]' : 'border-primary/50'}`}>
+      <div className={`w-full h-full`}>
+        <img
+          src={card.image}
+          alt={card.name}
+          className={`w-full h-full object-contain ${isPortrait ? '' : 'object-top'}`}
+        />
+      </div>
     </div>
   );
 }
@@ -309,7 +312,7 @@ function CardFace({ card, isChosen }: { card: any, isChosen?: boolean }) {
 function SessionDeckCard({ deck, sessionId, canAccess, isCompleted, onClick, onCardChosen }: any) {
   const { data: cards } = useCardsByDeck(deck.id);
   const { data: notes } = useNotesBySession(sessionId);
-  
+
   const chosenCard = useMemo(() => {
     if (!cards || !notes) return null;
     const deckCardIds = cards.map(c => c.id);
@@ -349,7 +352,7 @@ function SessionDeckCard({ deck, sessionId, canAccess, isCompleted, onClick, onC
           </div>
         </>
       )}
-      
+
       {!canAccess && !isCompleted && (
         <div className="absolute inset-0 flex items-center justify-center bg-black/60 backdrop-blur-[2px] z-20">
           <Lock className="w-8 h-8 text-white/50" />

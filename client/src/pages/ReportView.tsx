@@ -9,12 +9,15 @@ import { useRef, useState, useMemo, useEffect } from "react";
   import { ru } from "date-fns/locale";
 
   function CardFaceMini({ card, deck }: { card: any, deck: any }) {
+    const isPortrait = card.orientation === 'portrait';
     return (
-      <div className="w-24 aspect-[2/3] relative rounded-lg border border-primary/30 overflow-hidden shadow-sm shrink-0 bg-card">
-        <div className="absolute inset-0 flex flex-col items-center justify-center p-2 text-center">
-          <span className="text-[6px] font-bold text-primary uppercase mb-1">{card.actionType}</span>
-          <h5 className="font-display font-bold text-sm leading-tight text-foreground">#{card.id}</h5>
-          <p className="font-display font-medium text-[8px] mt-1 text-foreground/80 leading-tight">{card.name}</p>
+      <div className={`${isPortrait ? 'w-16' : 'w-24'} aspect-[3/2] relative rounded-lg border border-primary/30 overflow-hidden shadow-sm shrink-0 bg-card`}>
+        <div className={`w-full h-full ${isPortrait ? '' : 'rotate-90'}`}>
+          <img 
+            src={card.image} 
+            alt={card.name}
+            className={`w-full h-full object-contain ${isPortrait ? '' : 'object-top'}`}
+          />
         </div>
       </div>
     );

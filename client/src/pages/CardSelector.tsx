@@ -9,42 +9,42 @@ import { Drawer, DrawerContent, DrawerHeader, DrawerTitle, DrawerDescription } f
 import { Textarea } from "@/components/ui/textarea";
 
   function CardFace({ card, isChosen }: { card: any, isChosen?: boolean }) {
+    const isPortrait = card.orientation === 'portrait';
     return (
-      <div className={`w-full h-full relative bg-card border-2 shadow-xl rounded-xl p-4 flex flex-col justify-center items-center text-center overflow-hidden ${isChosen ? 'border-primary shadow-[0_0_15px_var(--primary)]' : 'border-primary/50'}`}>
-        <div className="absolute inset-0 bg-gradient-to-b from-primary/10 to-transparent pointer-events-none" />
-        <span className="text-[10px] font-bold text-primary mb-2 uppercase tracking-wider">{card.actionType}</span>
-        <h5 className="font-display font-bold text-2xl leading-tight text-foreground">#{card.id}</h5>
-        <p className="font-display font-medium text-xs mt-2 text-foreground/80">{card.name}</p>
-        {isChosen && <div className="mt-2 bg-primary/20 px-2 py-0.5 rounded text-[10px] text-primary font-bold tracking-widest">ВЫБРАНО</div>}
+      <div className={`${isPortrait ? 'w-full' : 'w-72'} relative bg-card border-2 shadow-xl rounded-xl overflow-hidden ${isChosen ? 'border-primary shadow-[0_0_15px_var(--primary)]' : 'border-primary/50'}`}>
+        <div className={`w-full h-full`}>
+          <img
+            src={card.image}
+            alt={card.name}
+            className={`w-full h-full object-contain ${isPortrait ? '' : 'object-top'}`}
+          />
+        </div>
       </div>
     );
   }
-
 
   function NestedDeckItem({ deckId, parentCardId, sessionId, slotIndex, onClick }: any) {
     const { data: allDecks } = useDecks();
     const { data: notes } = useNotesBySession(sessionId);
     const { data: deckCards } = useCardsByDeck(deckId);
-    const deck = allDecks?.find(d => d.id === deckId);
+    const deck = allDecks?.find((d: any) => d.id === deckId);
 
     const chosenCard = useMemo(() => {
       if (!notes || !deckCards) return null;
-      const cardIds = deckCards.map(c => c.id);
-      const note = notes.find(n => n.parentId === parentCardId && n.slotIndex === slotIndex && cardIds.includes(n.cardId));
+      const cardIds = deckCards.map((c: any) => c.id);
+      const note = notes.find((n: any) => n.parentId === parentCardId && n.slotIndex === slotIndex && cardIds.includes(n.cardId));
       if (!note) return null;
-      return deckCards.find(c => c.id === note.cardId);
+      return deckCards.find((c: any) => c.id === note.cardId);
     }, [notes, deckCards, parentCardId]);
 
+    const isPortrait = !chosenCard || chosenCard.orientation === 'portrait';
     return (
-      <Button
-        variant="outline"
-        className={`shrink-0 h-24 w-16 p-0 border-primary/50 bg-card hover:bg-primary/20 relative overflow-hidden ${chosenCard ? 'border-primary/50' : ''}`}
+      <div
+        className={`shrink-0 cursor-pointer ${isPortrait ? 'w-16 aspect-[2/3]' : 'w-24 aspect-[3/2]'} border-primary/50 rounded-xl overflow-hidden bg-card hover:bg-primary/20 relative`}
         onClick={onClick}
       >
         {chosenCard ? (
-          <div className="w-full h-full scale-50 origin-center pointer-events-none">
-             <CardFace card={chosenCard} isChosen={false} />
-          </div>
+          <CardFace card={chosenCard} isChosen={true} />
         ) : (
           <>
             <div className="absolute inset-0 bg-primary/10 flex items-center justify-center z-10">
@@ -55,7 +55,7 @@ import { Textarea } from "@/components/ui/textarea";
             )}
           </>
         )}
-      </Button>
+      </div>
     );
   }
 
@@ -129,6 +129,7 @@ import { Textarea } from "@/components/ui/textarea";
         />
       );
     }
+    const isPortrait = card.orientation === 'portrait';
 
     return (
       <div className="flex flex-col h-full space-y-4">
@@ -137,7 +138,7 @@ import { Textarea } from "@/components/ui/textarea";
         </div>
         <div className="flex flex-col gap-6 items-center">
           <div className="shrink-0 w-full flex justify-center">
-            <div className="w-48 aspect-[2/3] relative">
+            <div className={`${isPortrait ? 'w-48 aspect-[2/3]' : 'w-72 aspect-[3/2]'} relative`}>
               <CardFace card={card} isChosen={true} />
             </div>
           </div>
