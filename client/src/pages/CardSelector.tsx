@@ -11,7 +11,7 @@ import { Textarea } from "@/components/ui/textarea";
   function CardFace({ card, isChosen }: { card: any, isChosen?: boolean }) {
     const isPortrait = card.orientation === 'portrait';
     return (
-      <div className={`${isPortrait ? 'w-full' : 'w-72'} relative bg-card border-2 shadow-xl rounded-xl overflow-hidden ${isChosen ? 'border-primary shadow-[0_0_15px_var(--primary)]' : 'border-primary/50'}`}>
+      <div className={`w-full relative bg-card border-2 shadow-xl rounded-xl overflow-hidden ${isChosen ? 'border-primary shadow-[0_0_15px_var(--primary)]' : 'border-primary/50'}`}>
         <div className={`w-full h-full`}>
           <img
             src={card.image}
@@ -40,7 +40,7 @@ import { Textarea } from "@/components/ui/textarea";
     const isPortrait = !chosenCard || chosenCard.orientation === 'portrait';
     return (
       <div
-        className={`shrink-0 cursor-pointer ${isPortrait ? 'w-16 aspect-[2/3]' : 'w-24 aspect-[3/2]'} border-primary/50 rounded-xl overflow-hidden bg-card hover:bg-primary/20 relative`}
+        className={`shrink-0 cursor-pointer ${isPortrait ? 'w-16 aspect-[2/3]' : 'w-24 aspect-[3/2]'} border-primary/50 rounded-xl overflow-hidden bg-card relative`}
         onClick={onClick}
       >
         {chosenCard ? (
