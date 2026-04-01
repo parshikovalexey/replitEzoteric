@@ -1,26 +1,65 @@
 [
   {
     "id": 1,
-    "name": "Страхи",
-    "sphere": "Подсознание",
-    "coverImage": "https://images.unsplash.com/photo-1509248961158-e54f6934749c?w=400"
+    "name": "ДОМ ПРЕДКОВ",
+    "sphere": "Интуиция",
+    "coverImage": "/cards/1-dom-predkov/1.jpg",
+    "orientation": "landscape"
   },
   {
     "id": 2,
-    "name": "Метафорические карты",
-    "sphere": "Подсознание",
-    "coverImage": "https://images.unsplash.com/photo-1518531933037-91b2f5f229cc?w=400"
+    "name": "ВИРУС НИЩЕТЫ",
+    "sphere": "Интуиция",
+    "coverImage": "/cards/2-virus-nishety/1.jpg",
+    "orientation": "landscape"
   },
   {
     "id": 3,
-    "name": "Архетипы",
-    "sphere": "Самопознание",
-    "coverImage": "https://images.unsplash.com/photo-1564419320461-6870880221ad?w=400"
+    "name": "НЕПРОЯВЛЕННЫЕ ДЕНЬГИ",
+    "sphere": "Интуиция",
+    "coverImage": "/cards/4-neproyavlenye-dengi/1.jpg",
+    "orientation": "landscape"
   },
   {
     "id": 4,
-    "name": "Действия",
-    "sphere": "Реализация",
-    "coverImage": "https://images.unsplash.com/photo-1484480974693-6ca0a78fb36b?w=400"
+    "name": "ШАТЕР ПРАВДЫ",
+    "sphere": "Интуиция",
+    "coverImage": "/cards/3-shater-pravdy/1.jpg",
+    "orientation": "landscape"
+  },
+  {
+    "id": 5,
+    "name": "РЕСУРСЫ",
+    "sphere": "Интуиция",
+    "coverImage": "/cards/6-resursy/1.jpg",
+    "orientation": "landscape"
+  },
+  {
+    "id": 6,
+    "name": "АКАДЕМИЯ ФИНАНСОВ",
+    "sphere": "Интуиция",
+    "coverImage": "/cards/7-akademiya-finansov/1.jpg",
+    "orientation": "landscape"
+  },
+  {
+    "id": 7,
+    "name": "ДЕНЕЖНАЯ ЯМА",
+    "sphere": "Действия",
+    "coverImage": "/cards/5-denezhnaya-yama/1.jpg",
+    "orientation": "landscape"
+  },
+  {
+    "id": 8,
+    "name": "ДЕНЕЖНЫЕ ДЕЙСТВИЯ",
+    "sphere": "Действия",
+    "coverImage": "/cards/8-denezhnye-deystviya/1.jpg",
+    "orientation": "landscape"
+  },
+  {
+    "id": 9,
+    "name": "МЕТАФОРИЧЕСКИЕ КАРТЫ",
+    "sphere": "Разум",
+    "coverImage": "/cards/9-metaforicheskie-karty/1.jpg",
+    "orientation": "portrait"
   }
 ]

@@ -21,10 +21,12 @@ export interface Card {
   id: number;
   deckId: number;
   name: string;
-  description: string;
+  description?: string;
+  image: string;
+  orientation: string;
   actionType: string;
   requiredDecks: number[];
-  tips: string | null;
+  tips?: string | null;
 }
 
 export interface Session {
