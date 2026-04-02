@@ -15,37 +15,37 @@
   },
   {
     "id": 3,
-    "name": "НЕПРОЯВЛЕННЫЕ ДЕНЬГИ",
-    "sphere": "Интуиция",
-    "coverImage": "/cards/4-neproyavlenye-dengi/1.jpg",
-    "orientation": "landscape"
-  },
-  {
-    "id": 4,
     "name": "ШАТЕР ПРАВДЫ",
     "sphere": "Интуиция",
     "coverImage": "/cards/3-shater-pravdy/1.jpg",
     "orientation": "landscape"
   },
   {
+    "id": 4,
+    "name": "НЕПРОЯВЛЕННЫЕ ДЕНЬГИ",
+    "sphere": "Интуиция",
+    "coverImage": "/cards/4-neproyavlenye-dengi/1.jpg",
+    "orientation": "landscape"
+  },
+  {
     "id": 5,
+    "name": "ДЕНЕЖНАЯ ЯМА",
+    "sphere": "Действия",
+    "coverImage": "/cards/5-denezhnaya-yama/1.jpg",
+    "orientation": "landscape"
+  },
+  {
+    "id": 6,
     "name": "РЕСУРСЫ",
     "sphere": "Интуиция",
     "coverImage": "/cards/6-resursy/1.jpg",
     "orientation": "landscape"
   },
   {
-    "id": 6,
+    "id": 7,
     "name": "АКАДЕМИЯ ФИНАНСОВ",
     "sphere": "Интуиция",
     "coverImage": "/cards/7-akademiya-finansov/1.jpg",
-    "orientation": "landscape"
-  },
-  {
-    "id": 7,
-    "name": "ДЕНЕЖНАЯ ЯМА",
-    "sphere": "Действия",
-    "coverImage": "/cards/5-denezhnaya-yama/1.jpg",
     "orientation": "landscape"
   },
   {

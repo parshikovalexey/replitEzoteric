@@ -12,7 +12,7 @@ import { useRef, useState, useMemo, useEffect } from "react";
   function CardFaceMini({ card, deck }: { card: any, deck: any }) {
     const isPortrait = card.orientation === 'portrait';
     return (
-      <div className={`${isPortrait ? 'w-20' : 'w-60'} shrink-0`}>
+      <div className={`${isPortrait ? 'w-40' : 'w-60'} shrink-0`}>
         <CardFace card={card} />
       </div>
     );

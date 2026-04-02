@@ -1,5 +1,4 @@
 [
-    { "id": 1, "deckId": 1, "name": "Рубашка", "actionType": "standard", "requiredDecks": [], "image": "/cards/1-dom-predkov/1.jpg", "orientation": "landscape" },
     { "id": 2, "deckId": 1, "name": "Карта 1", "actionType": "nested", "requiredDecks": [9], "image": "/cards/1-dom-predkov/2.jpg", "orientation": "landscape" },
     { "id": 3, "deckId": 1, "name": "Карта 2", "actionType": "standard", "requiredDecks": [], "image": "/cards/1-dom-predkov/3.jpg", "orientation": "landscape" },
     { "id": 4, "deckId": 1, "name": "Карта 3", "actionType": "standard", "requiredDecks": [], "image": "/cards/1-dom-predkov/4.jpg", "orientation": "landscape" },
@@ -13,7 +12,6 @@
     { "id": 12, "deckId": 1, "name": "Карта 11", "actionType": "nested", "requiredDecks": [9, 9], "image": "/cards/1-dom-predkov/12.jpg", "orientation": "landscape" },
     { "id": 13, "deckId": 1, "name": "Карта 12", "actionType": "nested", "requiredDecks": [9, 9], "image": "/cards/1-dom-predkov/13.jpg", "orientation": "landscape" },
 
-	{ "id": 14, "deckId": 2, "name": "Рубашка", "actionType": "standard", "requiredDecks": [], "image": "/cards/2-virus-nishety/1.jpg", "orientation": "landscape" },
 	{ "id": 15, "deckId": 2, "name": "Карта 1", "actionType": "standard", "requiredDecks": [], "image": "/cards/2-virus-nishety/2.jpg", "orientation": "landscape" },
 	{ "id": 16, "deckId": 2, "name": "Карта 2", "actionType": "standard", "requiredDecks": [], "image": "/cards/2-virus-nishety/3.jpg", "orientation": "landscape" },
 	{ "id": 17, "deckId": 2, "name": "Карта 3", "actionType": "standard", "requiredDecks": [], "image": "/cards/2-virus-nishety/4.jpg", "orientation": "landscape" },
@@ -81,7 +79,6 @@
 	{ "id": 79, "deckId": 2, "name": "Карта 65", "actionType": "standard", "requiredDecks": [], "image": "/cards/2-virus-nishety/66.jpg", "orientation": "landscape" },
 	{ "id": 80, "deckId": 2, "name": "Карта 66", "actionType": "standard", "requiredDecks": [], "image": "/cards/2-virus-nishety/67.jpg", "orientation": "landscape" },
 
-	{ "id": 81, "deckId": 3, "name": "Рубашка", "actionType": "standard", "requiredDecks": [], "image": "/cards/3-shater-pravdy/1.jpg", "orientation": "landscape" },
 	{ "id": 82, "deckId": 3, "name": "Карта 1", "actionType": "standard", "requiredDecks": [], "image": "/cards/3-shater-pravdy/2.jpg", "orientation": "landscape" },
 	{ "id": 83, "deckId": 3, "name": "Карта 2", "actionType": "nested", "requiredDecks": [9], "image": "/cards/3-shater-pravdy/3.jpg", "orientation": "landscape" },
 	{ "id": 84, "deckId": 3, "name": "Карта 3", "actionType": "nested", "requiredDecks": [2], "image": "/cards/3-shater-pravdy/4.jpg", "orientation": "landscape" },
@@ -106,7 +103,6 @@
 	{ "id": 103, "deckId": 3, "name": "Карта 22", "actionType": "nested", "requiredDecks": [9], "image": "/cards/3-shater-pravdy/23.jpg", "orientation": "landscape" },
 	{ "id": 104, "deckId": 3, "name": "Карта 23", "actionType": "nested", "requiredDecks": [9], "image": "/cards/3-shater-pravdy/24.jpg", "orientation": "landscape" },
 
-	{ "id": 105, "deckId": 4, "name": "Рубашка", "actionType": "standard", "requiredDecks": [], "image": "/cards/4-neproyavlenye-dengi/1.jpg", "orientation": "landscape" },
 	{ "id": 106, "deckId": 4, "name": "Карта 1", "actionType": "nested", "requiredDecks": [9], "image": "/cards/4-neproyavlenye-dengi/2.jpg", "orientation": "landscape" },
 	{ "id": 107, "deckId": 4, "name": "Карта 2", "actionType": "standard", "requiredDecks": [], "image": "/cards/4-neproyavlenye-dengi/3.jpg", "orientation": "landscape" },
 	{ "id": 108, "deckId": 4, "name": "Карта 3", "actionType": "nested", "requiredDecks": [2], "image": "/cards/4-neproyavlenye-dengi/4.jpg", "orientation": "landscape" },
@@ -120,7 +116,6 @@
 	{ "id": 116, "deckId": 4, "name": "Карта 11", "actionType": "standard", "requiredDecks": [], "image": "/cards/4-neproyavlenye-dengi/12.jpg", "orientation": "landscape" },
 	{ "id": 117, "deckId": 4, "name": "Карта 12", "actionType": "nested", "requiredDecks": [1], "image": "/cards/4-neproyavlenye-dengi/13.jpg", "orientation": "landscape" },
 
-	{ "id": 118, "deckId": 5, "name": "Рубашка", "actionType": "standard", "requiredDecks": [], "image": "/cards/5-denezhnaya-yama/1.jpg", "orientation": "landscape" },
 	{ "id": 119, "deckId": 5, "name": "Карта 1", "actionType": "standard", "requiredDecks": [], "image": "/cards/5-denezhnaya-yama/2.jpg", "orientation": "landscape" },
 	{ "id": 120, "deckId": 5, "name": "Карта 2", "actionType": "standard", "requiredDecks": [], "image": "/cards/5-denezhnaya-yama/3.jpg", "orientation": "landscape" },
 	{ "id": 121, "deckId": 5, "name": "Карта 3", "actionType": "standard", "requiredDecks": [], "image": "/cards/5-denezhnaya-yama/4.jpg", "orientation": "landscape" },
@@ -131,7 +126,6 @@
 	{ "id": 126, "deckId": 5, "name": "Карта 8", "actionType": "standard", "requiredDecks": [], "image": "/cards/5-denezhnaya-yama/9.jpg", "orientation": "landscape" },
 	{ "id": 127, "deckId": 5, "name": "Карта 9", "actionType": "standard", "requiredDecks": [], "image": "/cards/5-denezhnaya-yama/10.jpg", "orientation": "landscape" },
 
-	{ "id": 128, "deckId": 6, "name": "Рубашка", "actionType": "standard", "requiredDecks": [], "image": "/cards/6-resursy/1.jpg", "orientation": "landscape" },
 	{ "id": 129, "deckId": 6, "name": "Карта 1", "actionType": "standard", "requiredDecks": [], "image": "/cards/6-resursy/2.jpg", "orientation": "landscape" },
 	{ "id": 130, "deckId": 6, "name": "Карта 2", "actionType": "standard", "requiredDecks": [], "image": "/cards/6-resursy/3.jpg", "orientation": "landscape" },
 	{ "id": 131, "deckId": 6, "name": "Карта 3", "actionType": "standard", "requiredDecks": [], "image": "/cards/6-resursy/4.jpg", "orientation": "landscape" },
@@ -145,7 +139,6 @@
 	{ "id": 139, "deckId": 6, "name": "Карта 11", "actionType": "standard", "requiredDecks": [], "image": "/cards/6-resursy/12.jpg", "orientation": "landscape" },
 	{ "id": 140, "deckId": 6, "name": "Карта 12", "actionType": "nested", "requiredDecks": [2], "image": "/cards/6-resursy/13.jpg", "orientation": "landscape" },
 
-	{ "id": 141, "deckId": 7, "name": "Рубашка", "actionType": "standard", "requiredDecks": [], "image": "/cards/7-akademiya-finansov/1.jpg", "orientation": "landscape" },
 	{ "id": 142, "deckId": 7, "name": "Карта 1", "actionType": "standard", "requiredDecks": [], "image": "/cards/7-akademiya-finansov/2.jpg", "orientation": "landscape" },
 	{ "id": 143, "deckId": 7, "name": "Карта 2", "actionType": "standard", "requiredDecks": [], "image": "/cards/7-akademiya-finansov/3.jpg", "orientation": "landscape" },
 	{ "id": 144, "deckId": 7, "name": "Карта 3", "actionType": "standard", "requiredDecks": [], "image": "/cards/7-akademiya-finansov/4.jpg", "orientation": "landscape" },
@@ -170,7 +163,6 @@
 	{ "id": 163, "deckId": 7, "name": "Карта 22", "actionType": "standard", "requiredDecks": [], "image": "/cards/7-akademiya-finansov/23.jpg", "orientation": "landscape" },
 	{ "id": 164, "deckId": 7, "name": "Карта 23", "actionType": "standard", "requiredDecks": [], "image": "/cards/7-akademiya-finansov/24.jpg", "orientation": "landscape" },
 
-	{ "id": 165, "deckId": 8, "name": "Рубашка", "actionType": "standard", "requiredDecks": [], "image": "/cards/8-denezhnye-deystviya/1.jpg", "orientation": "landscape" },
 	{ "id": 166, "deckId": 8, "name": "Карта 1", "actionType": "standard", "requiredDecks": [], "image": "/cards/8-denezhnye-deystviya/2.jpg", "orientation": "landscape" },
 	{ "id": 167, "deckId": 8, "name": "Карта 2", "actionType": "standard", "requiredDecks": [], "image": "/cards/8-denezhnye-deystviya/3.jpg", "orientation": "landscape" },
 	{ "id": 168, "deckId": 8, "name": "Карта 3", "actionType": "standard", "requiredDecks": [], "image": "/cards/8-denezhnye-deystviya/4.jpg", "orientation": "landscape" },
@@ -190,7 +182,6 @@
 	{ "id": 182, "deckId": 8, "name": "Карта 17", "actionType": "standard", "requiredDecks": [], "image": "/cards/8-denezhnye-deystviya/18.jpg", "orientation": "landscape" },
 	{ "id": 183, "deckId": 8, "name": "Карта 18", "actionType": "standard", "requiredDecks": [], "image": "/cards/8-denezhnye-deystviya/19.jpg", "orientation": "landscape" },
 
-	{ "id": 184, "deckId": 9, "name": "Рубашка", "actionType": "standard", "requiredDecks": [], "image": "/cards/9-metaforicheskie-karty/1.jpg", "orientation": "portrait" },
 	{ "id": 185, "deckId": 9, "name": "Карта 1", "actionType": "standard", "requiredDecks": [], "image": "/cards/9-metaforicheskie-karty/2.jpg", "orientation": "portrait" },
 	{ "id": 186, "deckId": 9, "name": "Карта 2", "actionType": "standard", "requiredDecks": [], "image": "/cards/9-metaforicheskie-karty/3.jpg", "orientation": "portrait" },
 	{ "id": 187, "deckId": 9, "name": "Карта 3", "actionType": "standard", "requiredDecks": [], "image": "/cards/9-metaforicheskie-karty/4.jpg", "orientation": "portrait" },

@@ -224,6 +224,17 @@ function NestedDeckNav({
 
     if (!cards || !deck) return <div className="p-8 text-center animate-pulse text-primary font-display">Загрузка колоды...</div>;
 
+    const shuffleArray = <T,>(array: T[]): T[] => {
+      const result = [...array];
+      for (let i = result.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [result[i], result[j]] = [result[j], result[i]];
+      }
+      return result;
+    };
+
+    const shuffledCards = shuffleArray<any>(cards);
+
     if (cardToShow) {
       return (
         <CardNoteDetail
@@ -247,7 +258,7 @@ function NestedDeckNav({
           <h3 className="font-display font-bold text-lg text-primary">{deck.name}</h3>
         </div>
         <div className="flex-1 overflow-y-auto grid grid-cols-3 gap-3 p-1 custom-scrollbar">
-          {cards.map((card) => (
+          {shuffledCards.map((card) => (
             <div
               key={card.id}
               onClick={() => handleNestedCardClick(card)}
@@ -354,7 +365,16 @@ export default function CardSelector({ sessionId: initialSessionId, deckId: init
       );
     }
 
-    const shuffledCards = [...(cards || [])].sort(() => 0.5 - Math.random());
+    const shuffleArray = <T,>(array: T[]): T[] => {
+      const result = [...array];
+      for (let i = result.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [result[i], result[j]] = [result[j], result[i]];
+      }
+      return result;
+    };
+
+    const shuffledCards = cards ? shuffleArray<any>(cards) : [];
 
     return (
       <MobileLayout
