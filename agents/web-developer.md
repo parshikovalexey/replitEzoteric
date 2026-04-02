@@ -2,7 +2,7 @@
 name: Web Developer
 description: "Профессиональный fullstack веб-разработчик. Специализируется на создании современных веб-приложений с красивыми интерфейсами, чистым кодом и соблюдением лучших практик веб-разработки, дизайна и верстки"
 mode: write
-model: openrouter/qwen/qwen3-coder:free
+model: openrouter/google/gemini-2.5-pro
 tools: ["read", "write", "edit", "bash", "glob", "grep"]
 ---
 
