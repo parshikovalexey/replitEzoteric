@@ -33,9 +33,6 @@ import { CardFace } from "@/components/CardFace";
           <CardFace card={chosenCard} isChosen={true} />
         ) : (
           <>
-            <div className="absolute inset-0 bg-primary/10 flex items-center justify-center z-10">
-              <span className="text-xs font-bold font-mono text-primary">N</span>
-            </div>
             {deck?.coverImage && (
               <img src={deck.coverImage} className="absolute inset-0 w-full h-full object-cover opacity-30" alt="" />
             )}
@@ -396,7 +393,6 @@ export default function CardSelector({ sessionId: initialSessionId, deckId: init
                   <div className="absolute inset-0 backface-hidden rounded-xl border-2 border-primary/20 shadow-lg flex items-center justify-center overflow-hidden" style={{ backgroundImage: `url(${deck.coverImage})`, backgroundSize: 'cover', backgroundPosition: 'center' }}>
                     <div className="absolute inset-0 bg-primary/10 rounded-xl group-hover:bg-primary/20 transition-colors" />
                     <div className="relative z-10 flex flex-col items-center gap-2">
-                      <span className="text-4xl font-bold text-white/40 font-display">{card.actionType === 'nested' ? 'N' : 'S'}</span>
                       {card.tips && <div className="px-2 py-0.5 rounded bg-primary/30 border border-primary/50 text-[10px] text-primary-foreground font-bold backdrop-blur-sm">СОВЕТ</div>}
                     </div>
                   </div>
