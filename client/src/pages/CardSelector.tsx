@@ -87,19 +87,16 @@ import { CardFace } from "@/components/CardFace";
 
     const handleSave = () => {
       console.log('[CardSelector] handleSave called, sessionId:', sessionId, 'parentId:', parentId);
-      // Immediate close if no changes, otherwise save and close
       if (content === (existingNote?.content || "")) {
-        console.log('[CardSelector] No changes, navigating to /session/', sessionId);
-        if (parentId === null) navigator.push(`/session/${sessionId}`);
-        else onClose();
+        console.log('[CardSelector] No changes, parentId:', parentId, 'calling onClose');
+        onClose();
         return;
       }
 
       saveNote.mutate({ sessionId, cardId: card.id, content, parentId, slotIndex }, {
         onSuccess: () => {
-          console.log('[CardSelector] Note saved, navigating to /session/', sessionId);
-          if (parentId === null) navigator.push(`/session/${sessionId}`);
-          else onClose();
+          console.log('[CardSelector] Note saved, parentId:', parentId, 'calling onClose');
+          onClose();
         }
       });
     };
@@ -166,7 +163,12 @@ import { CardFace } from "@/components/CardFace";
                   parentCardId={card.id}
                   sessionId={sessionId}
                   slotIndex={idx}
-                  onClick={() => setActiveSlot({deckId: reqDeckId, index: idx})}
+                  onClick={() => {
+                    if (content !== (existingNote?.content || "")) {
+                      saveNote.mutate({ sessionId, cardId: card.id, content, parentId, slotIndex });
+                    }
+                    setActiveSlot({deckId: reqDeckId, index: idx});
+                  }}
                 />
               ))}
             </div>
@@ -229,7 +231,10 @@ function NestedDeckNav({
           sessionId={sessionId}
           parentId={parentCardId}
           slotIndex={slotIndex}
-          onClose={selectedCard ? () => setSelectedCard(null) : onBack}
+          onClose={() => {
+            setSelectedCard(null);
+            onBack();
+          }}
           navigator={navigator}
         />
       );
@@ -293,10 +298,10 @@ export default function CardSelector({ sessionId: initialSessionId, deckId: init
     }, [notes, cards]);
 
     const handleClose = () => {
+      console.log('[CardSelector] handleClose called, activeCard:', activeCard);
       setActiveCard(null);
-      if (chosenRootCardId) {
-        navigator.push(`/session/${sessionId}`);
-      }
+      console.log('[CardSelector] handleClose: pushing to /session/', sessionId);
+      navigator.push(`/session/${sessionId}`);
     };
 
     useEffect(() => {

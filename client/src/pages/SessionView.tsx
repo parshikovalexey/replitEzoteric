@@ -58,6 +58,14 @@ export default function SessionView({ sessionId: initialSessionId }: SessionView
   const { data: allCards } = useAllCards();
   const updateSession = useUpdateSession();
 
+  const hasLandscapeCard = useMemo(() => {
+    if (!notes || !allCards || !session) return false;
+    const deckIds = session.deckIds;
+    const deckCards = allCards.filter(c => deckIds.includes(c.deckId));
+    const chosenCardIds = notes.filter(n => n.parentId === null).map(n => n.cardId);
+    return deckCards.some(c => chosenCardIds.includes(c.id) && c.orientation === 'landscape');
+  }, [notes, allCards, session?.deckIds]);
+
   const [isExpanded, setIsExpanded] = useState(false);
 
     const getChildNotes = (parentCardId: number, currentNotes: any[]): string[] => {
@@ -156,20 +164,11 @@ export default function SessionView({ sessionId: initialSessionId }: SessionView
 
   const sessionDecks = allDecks?.filter(d => session.deckIds.includes(d.id)) || [];
 
-  const hasLandscapeCard = useMemo(() => {
-    if (!notes || !allCards) return false;
-    const deckIds = session.deckIds;
-    const deckCards = allCards.filter(c => deckIds.includes(c.deckId));
-    const chosenCardIds = notes.filter(n => n.parentId === null).map(n => n.cardId);
-    return deckCards.some(c => chosenCardIds.includes(c.id) && c.orientation === 'landscape');
-  }, [notes, allCards, session.deckIds]);
-
   // Logic to determine if all cards are chosen
   const rootNotesCount = notes?.filter(n => n.parentId === null).length || 0;
   const isReadyToFinish = rootNotesCount >= session.deckIds.length;
 
   const finishSession = () => {
-    if (!isReadyToFinish) return;
     updateSession.mutate({ id: sessionId!, status: 'completed', notes: notesText }, {
       onSuccess: () => navigator.push('/training')
     });
@@ -263,21 +262,13 @@ export default function SessionView({ sessionId: initialSessionId }: SessionView
               className="min-h-[200px] glass-panel border-primary/20 bg-background/50 text-base resize-none focus-visible:ring-primary/30 custom-scrollbar"
             />
 
-              {isReadyToFinish && notesText.length >= 3 ? (
+              {notesText.length >= 2 && timerStarted ? (
                 <Button
                   onClick={finishSession}
                   className="w-full bg-primary text-primary-foreground hover:bg-primary/90 mt-4"
-                  data-testid="button-finish-session"
+                  data-testid="button-save-session"
                 >
-                  Сохранить и завершить сессию
-                </Button>
-              ) : !isReadyToFinish && notesText.length >= 2 ? (
-                <Button
-                  onClick={() => updateSession.mutate({ id: sessionId, notes: notesText })}
-                  className="w-full bg-primary text-primary-foreground hover:bg-primary/90 mt-4"
-                  data-testid="button-save-session-note"
-                >
-                  Сохранить
+                  Сохранить и завершить
                 </Button>
               ) : null}
 
