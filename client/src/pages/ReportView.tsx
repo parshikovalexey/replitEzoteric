@@ -7,18 +7,13 @@ import { useRef, useState, useMemo, useEffect } from "react";
   import jsPDF from "jspdf";
   import { format } from "date-fns";
   import { ru } from "date-fns/locale";
+  import { CardFace } from "@/components/CardFace";
 
   function CardFaceMini({ card, deck }: { card: any, deck: any }) {
     const isPortrait = card.orientation === 'portrait';
     return (
-      <div className={`${isPortrait ? 'w-16' : 'w-24'} aspect-[3/2] relative rounded-lg border border-primary/30 overflow-hidden shadow-sm shrink-0 bg-card`}>
-        <div className={`w-full h-full ${isPortrait ? '' : 'rotate-90'}`}>
-          <img 
-            src={card.image} 
-            alt={card.name}
-            className={`w-full h-full object-contain ${isPortrait ? '' : 'object-top'}`}
-          />
-        </div>
+      <div className={`${isPortrait ? 'w-20' : 'w-60'} shrink-0`}>
+        <CardFace card={card} />
       </div>
     );
   }
@@ -46,7 +41,6 @@ import { useRef, useState, useMemo, useEffect } from "react";
         <div className="flex gap-4 items-start">
           <CardFaceMini card={card} deck={deck} />
           <div className="flex-1 space-y-2">
-            <h4 className="text-lg font-bold text-[#2b005e] border-b border-[#d4af37]/30 pb-1">{card.name}</h4>
             <div className="p-3 bg-gray-50 rounded-lg border border-gray-100 italic text-gray-700 whitespace-pre-wrap text-sm leading-relaxed">
               {note?.content || "Заметка отсутствует"}
             </div>
